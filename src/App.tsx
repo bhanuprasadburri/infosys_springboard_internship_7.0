@@ -1,6 +1,16 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
+import { AuthProvider } from './auth/AuthContext';
+import ProtectedRoute from './auth/ProtectedRoute';
 import Dashboard from './pages/Dashboard';
+import Assets from './pages/Assets';
+import Incidents from './pages/Incidents';
+import Vulnerabilities from './pages/Vulnerabilities';
+import Audit from './pages/Audit';
+import Compliance from './pages/Compliance';
+import DevSecOps from './pages/DevSecOps';
+import Login from './pages/Login';
+import SignUp from './pages/SignUp';
 
 const theme = createTheme({
   palette: {
@@ -19,11 +29,25 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/*" element={<Dashboard />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<SignUp />} />
+            <Route element={<ProtectedRoute />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/assets" element={<Assets />} />
+              <Route path="/incidents" element={<Incidents />} />
+              <Route path="/vulnerabilities" element={<Vulnerabilities />} />
+              <Route path="/audit" element={<Audit />} />
+              <Route path="/compliance" element={<Compliance />} />
+              <Route path="/devsecops" element={<DevSecOps />} />
+            </Route>
+            <Route path="*" element={<Navigate to="/login" replace />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

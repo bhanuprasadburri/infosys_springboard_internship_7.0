@@ -1,21 +1,30 @@
-import { AppBar, Box, Chip, Toolbar, Typography } from '@mui/material';
+import { AppBar, Box, Toolbar, Typography } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/AuthContext';
 
 export default function TopBar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <AppBar position="static" elevation={0} sx={{ bgcolor: '#8b1e1e', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
-      <Toolbar sx={{ justifyContent: 'space-between', gap: 2, flexWrap: 'wrap' }}>
-        <Box>
-          <Typography variant="h6" sx={{ fontWeight: 700, letterSpacing: 0.4 }}>
-            SentinelCore SecureOps
-          </Typography>
-          <Typography variant="caption" sx={{ opacity: 0.86 }}>
-            Enterprise Security Operations Platform
-          </Typography>
-        </Box>
-        <Chip label="Milestone 1 • Infrastructure Monitoring" sx={{ bgcolor: 'rgba(255,255,255,0.16)', color: 'white' }} />
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          Security Admin • Logout
+      <Toolbar sx={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
+        <Typography variant="h6" sx={{ fontWeight: 700 }}>
+          SentinelCore SecureOps
         </Typography>
+        {user ? (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Typography variant="body2">{user.role} • {user.fullName}</Typography>
+            <Typography variant="body2" sx={{ cursor: 'pointer', color: '#fdd0d0' }} onClick={handleLogout}>
+              Logout
+            </Typography>
+          </Box>
+        ) : null}
       </Toolbar>
     </AppBar>
   );

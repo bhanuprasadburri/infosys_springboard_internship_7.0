@@ -1,7 +1,17 @@
+export type Role = 'Security Admin' | 'Auditor' | 'Viewer';
 export type AssetStatus = 'healthy' | 'warning' | 'critical';
 export type AssetType = 'server' | 'cloud' | 'k8s-pod';
 export type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type AlertStatus = 'active' | 'resolved' | 'investigating';
+export type IncidentStatus = 'Open' | 'Assigned' | 'Investigation' | 'Resolved';
+export type VulnerabilityStatus = 'available' | 'tested' | 'pending';
+
+export interface User {
+  id: string;
+  fullName: string;
+  email: string;
+  role: Role;
+}
 
 export interface Asset {
   id: string;
@@ -14,6 +24,42 @@ export interface Asset {
   memory: number;
   disk: number;
   network: number;
+  lastChecked: string;
+}
+
+export interface Incident {
+  id: string;
+  title: string;
+  severity: AlertSeverity;
+  sourceIp: string;
+  status: IncidentStatus;
+  assignedTeam: string;
+  eta: string;
+  createdAt: string;
+}
+
+export interface Vulnerability {
+  id: string;
+  cveId: string;
+  severity: AlertSeverity;
+  cvss: number;
+  affectedAssets: number;
+  patchStatus: VulnerabilityStatus;
+  riskScore: number;
+  lastScanSource: string;
+}
+
+export interface AuditLog {
+  id: string;
+  action: string;
+  user: string;
+  timestamp: string;
+  source: string;
+}
+
+export interface ComplianceReport {
+  framework: string;
+  status: 'Compliant' | 'Review';
 }
 
 export interface Alert {
@@ -40,6 +86,28 @@ export interface CloudResource {
   type: string;
   count: number;
   status: AssetStatus;
+}
+
+export interface Metric {
+  label: string;
+  value: number;
+  unit: string;
+  threshold: number;
+  status: AssetStatus;
+}
+
+export interface Policy {
+  id: string;
+  name: string;
+  owner: string;
+  status: 'Enabled' | 'Review';
+}
+
+export interface Report {
+  id: string;
+  name: string;
+  type: string;
+  generatedAt: string;
 }
 
 export interface DashboardSummary {

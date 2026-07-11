@@ -21,14 +21,14 @@ export const dashboardSummary: DashboardSummary = {
 };
 
 export const assets: Asset[] = [
-  { id: 'AS-1001', name: 'DB-SRV-12', type: 'server', status: 'critical', environment: 'Production', provider: 'AWS', cpu: 94, memory: 81, disk: 67, network: 32 },
-  { id: 'AS-1002', name: 'APP-SRV-03', type: 'server', status: 'healthy', environment: 'Production', provider: 'Azure', cpu: 21, memory: 44, disk: 58, network: 11 },
-  { id: 'AS-1003', name: 'WEB-SRV-08', type: 'server', status: 'warning', environment: 'Staging', provider: 'AWS', cpu: 68, memory: 73, disk: 51, network: 23 },
-  { id: 'AS-1004', name: 'CACHE-CLD-01', type: 'cloud', status: 'healthy', environment: 'Production', provider: 'AWS', cpu: 19, memory: 37, disk: 44, network: 8 },
-  { id: 'AS-1005', name: 'K8S-POD-44', type: 'k8s-pod', status: 'warning', environment: 'Production', provider: 'Kubernetes', cpu: 57, memory: 64, disk: 42, network: 18 },
-  { id: 'AS-1006', name: 'API-SRV-11', type: 'server', status: 'healthy', environment: 'Production', provider: 'Azure', cpu: 13, memory: 31, disk: 39, network: 9 },
-  { id: 'AS-1007', name: 'K8S-POD-77', type: 'k8s-pod', status: 'critical', environment: 'Development', provider: 'Kubernetes', cpu: 91, memory: 78, disk: 72, network: 41 },
-  { id: 'AS-1008', name: 'DATA-CLD-02', type: 'cloud', status: 'healthy', environment: 'Production', provider: 'Azure', cpu: 25, memory: 28, disk: 35, network: 15 },
+  { id: 'AS-1001', name: 'DB-SRV-12', type: 'server', status: 'critical', environment: 'Production', provider: 'AWS', cpu: 94, memory: 81, disk: 67, network: 32, lastChecked: '2m ago' },
+  { id: 'AS-1002', name: 'APP-SRV-03', type: 'server', status: 'healthy', environment: 'Production', provider: 'Azure', cpu: 21, memory: 44, disk: 58, network: 11, lastChecked: '4m ago' },
+  { id: 'AS-1003', name: 'WEB-SRV-08', type: 'server', status: 'warning', environment: 'Staging', provider: 'AWS', cpu: 68, memory: 73, disk: 51, network: 23, lastChecked: '8m ago' },
+  { id: 'AS-1004', name: 'CACHE-CLD-01', type: 'cloud', status: 'healthy', environment: 'Production', provider: 'AWS', cpu: 19, memory: 37, disk: 44, network: 8, lastChecked: '6m ago' },
+  { id: 'AS-1005', name: 'K8S-POD-44', type: 'k8s-pod', status: 'warning', environment: 'Production', provider: 'Kubernetes', cpu: 57, memory: 64, disk: 42, network: 18, lastChecked: '10m ago' },
+  { id: 'AS-1006', name: 'API-SRV-11', type: 'server', status: 'healthy', environment: 'Production', provider: 'Azure', cpu: 13, memory: 31, disk: 39, network: 9, lastChecked: '3m ago' },
+  { id: 'AS-1007', name: 'K8S-POD-77', type: 'k8s-pod', status: 'critical', environment: 'Development', provider: 'Kubernetes', cpu: 91, memory: 78, disk: 72, network: 41, lastChecked: '1m ago' },
+  { id: 'AS-1008', name: 'DATA-CLD-02', type: 'cloud', status: 'healthy', environment: 'Production', provider: 'Azure', cpu: 25, memory: 28, disk: 35, network: 15, lastChecked: '5m ago' },
 ];
 
 export const alerts: Alert[] = [
