@@ -1,22 +1,27 @@
 # SentinelCore SecureOps
 
-SentinelCore SecureOps is a React 20 + TypeScript frontend for Milestone 1 of the SecureOps platform. It focuses strictly on infrastructure monitoring with mock data and a reusable, component-based layout.
+SentinelCore SecureOps is a TypeScript-based React frontend built with Vite and Material UI. It simulates an enterprise security operations console with a dark security aesthetic, mock authentication, and end-to-end app navigation.
 
-## Included in Milestone 1
+## Features
 
-- Infrastructure Monitoring dashboard
-- Asset inventory and health summaries
-- Cloud monitoring breakdown for AWS, Azure, and Kubernetes
-- Network and resource health metrics
-- Alert feed and action panel
-- Disabled placeholders for future Incident, Vulnerability, Audit, Compliance, and DevSecOps routes
+- Protected login and signup flow using mock authentication
+- Dashboard with asset health, resource metrics, and alert feed
+- Asset inventory filtering and status monitoring
+- Incidents page with triage workflow and live incident tracking
+- Vulnerabilities page with CVE risk ratings and patch status
+- Audit page with log filtering and activity review
+- Compliance page with framework coverage and report generation
+- DevSecOps page with security review status and pipeline insights
+- Reusable MUI components for cards, tables, badges, sidebar navigation, and top bar
 
-## Run locally
+## Getting Started
 
 ```bash
 npm install
 npm run dev
 ```
+
+Open `http://localhost:5173` in your browser.
 
 ## Build
 
@@ -24,6 +29,14 @@ npm run dev
 npm run build
 ```
 
+## Preview
+
+```bash
+npm run preview
+```
+
 ## Notes
 
-This milestone uses local mock data and simulated refresh behavior only. No backend API or authentication has been implemented yet.
+- All data is mock/sample data stored locally in the app.
+- Authentication is simulated in the React context; there is no backend API.
+- The app is styled with Material UI and uses React Router for protected routes.
