@@ -1,15 +1,38 @@
-import { Box, MenuItem, Paper, Stack, TextField, Typography } from '@mui/material';
-import { useState } from 'react';
+import { Box, MenuItem, Paper, Stack, TableCell, TextField, Typography, Pagination } from '@mui/material';
+import { useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
 import StatCard from '../components/StatCard';
 import DataTable from '../components/DataTable';
-import { mockAuditLogs } from '../data/mockAssets';
+import { useAppState } from '../context/AppStateContext';
 import type { AuditLog } from '../types';
-import { TableCell } from '@mui/material';
+
+const PAGE_SIZE = 8;
 
 export default function Audit() {
+  const { auditLogs } = useAppState();
   const [actionFilter, setActionFilter] = useState('all');
+  const [dateFilter, setDateFilter] = useState('all');
+  const [page, setPage] = useState(1);
+
+  const filteredLogs = useMemo(() => {
+    const byAction = actionFilter === 'all' ? auditLogs : auditLogs.filter((entry) => entry.action === actionFilter);
+    const now = new Date();
+    const byDate = dateFilter === 'today'
+      ? byAction.filter((entry) => entry.date === now.toISOString().slice(0, 10))
+      : dateFilter === 'week'
+        ? byAction.filter((entry) => {
+            const entryDate = new Date(entry.date);
+            const diff = Math.abs(now.getTime() - entryDate.getTime());
+            return diff <= 7 * 24 * 60 * 60 * 1000;
+          })
+        : byAction;
+    return byDate;
+  }, [actionFilter, auditLogs, dateFilter]);
+
+  const pageCount = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE));
+  const pagedLogs = filteredLogs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#050b13', color: '#f5f7fa' }}>
       <TopBar />
@@ -24,18 +47,24 @@ export default function Audit() {
           </Box>
           <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField select label="Action" value={actionFilter} onChange={(e) => setActionFilter(e.target.value)} size="small" sx={{ minWidth: 180 }}>
+              <TextField select label="Action" value={actionFilter} onChange={(e) => { setActionFilter(e.target.value); setPage(1); }} size="small" sx={{ minWidth: 180 }}>
                 <MenuItem value="all">All</MenuItem>
-                <MenuItem value="Login Granted">Login Granted</MenuItem>
-                <MenuItem value="Policy Updated">Policy Updated</MenuItem>
-                <MenuItem value="Export Report">Export Report</MenuItem>
+                {Array.from(new Set(auditLogs.map((entry) => entry.action))).map((action) => (
+                  <MenuItem key={action} value={action}>{action}</MenuItem>
+                ))}
+              </TextField>
+              <TextField select label="Date range" value={dateFilter} onChange={(e) => { setDateFilter(e.target.value); setPage(1); }} size="small" sx={{ minWidth: 160 }}>
+                <MenuItem value="all">All time</MenuItem>
+                <MenuItem value="today">Today</MenuItem>
+                <MenuItem value="week">Last 7 days</MenuItem>
               </TextField>
             </Stack>
           </Paper>
           <DataTable<AuditLog>
             title="Audit entries"
             columns={['Log ID', 'Action', 'User', 'Timestamp', 'IP / Source']}
-            rows={mockAuditLogs.filter((entry) => actionFilter === 'all' || entry.action === actionFilter)}
+            rows={pagedLogs}
+            emptyText="No audit log entries match your filters"
             renderRow={(entry) => (
               <>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.id}</TableCell>
@@ -45,6 +74,11 @@ export default function Audit() {
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.source}</TableCell>
               </>
             )}
+            footer={
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Pagination count={pageCount} page={page} onChange={(_, value) => setPage(value)} color="secondary" />
+              </Box>
+            }
           />
         </Box>
       </Box>

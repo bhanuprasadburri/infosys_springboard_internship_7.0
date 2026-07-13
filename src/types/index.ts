@@ -3,8 +3,8 @@ export type AssetStatus = 'healthy' | 'warning' | 'critical';
 export type AssetType = 'server' | 'cloud' | 'k8s-pod';
 export type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type AlertStatus = 'active' | 'resolved' | 'investigating';
-export type IncidentStatus = 'Open' | 'Assigned' | 'Investigation' | 'Resolved';
-export type VulnerabilityStatus = 'available' | 'tested' | 'pending';
+export type IncidentStatus = 'Open' | 'Assigned' | 'Investigation' | 'Resolved' | 'Closed';
+export type VulnerabilityStatus = 'available' | 'tested' | 'pending' | 'patched';
 
 export interface User {
   id: string;
@@ -24,7 +24,15 @@ export interface Asset {
   memory: number;
   disk: number;
   network: number;
+  allocatedCapacity: number;
   lastChecked: string;
+  lastReviewed?: string;
+}
+
+export interface IncidentNote {
+  id: string;
+  text: string;
+  timestamp: string;
 }
 
 export interface Incident {
@@ -34,8 +42,18 @@ export interface Incident {
   sourceIp: string;
   status: IncidentStatus;
   assignedTeam: string;
+  assignee?: string;
   eta: string;
   createdAt: string;
+  resolvedAt?: string;
+  slaHours?: number;
+  source?: string;
+  type?: string;
+  affectedAsset?: string;
+  affectedUser?: string;
+  activityLog?: string[];
+  notes?: IncidentNote[];
+  recommendedActions?: string[];
 }
 
 export interface Vulnerability {
@@ -46,7 +64,11 @@ export interface Vulnerability {
   affectedAssets: number;
   patchStatus: VulnerabilityStatus;
   riskScore: number;
+  previousRiskScore?: number;
   lastScanSource: string;
+  lastScanTimestamp?: string;
+  affectedAssetNames?: string[];
+  activityLog?: string[];
 }
 
 export interface AuditLog {
@@ -54,6 +76,7 @@ export interface AuditLog {
   action: string;
   user: string;
   timestamp: string;
+  date: string;
   source: string;
 }
 

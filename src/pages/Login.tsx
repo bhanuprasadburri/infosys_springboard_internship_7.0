@@ -1,6 +1,6 @@
 import { Box, Button, Checkbox, FormControlLabel, Link, Paper, Stack, TextField, Typography } from '@mui/material';
 import { useState } from 'react';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useLocation, useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 
 export default function Login() {
@@ -9,6 +9,8 @@ export default function Login() {
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const from = (location.state as { from?: Location })?.from?.pathname || '/dashboard';
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
@@ -22,7 +24,7 @@ export default function Login() {
     }
     const ok = login(email, password);
     if (ok) {
-      navigate('/dashboard');
+      navigate(from, { replace: true });
     } else {
       setError('Invalid credentials.');
     }
@@ -43,7 +45,7 @@ export default function Login() {
             <TextField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} fullWidth required />
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <FormControlLabel control={<Checkbox />} label="Remember me" />
-              <Link href="#" underline="hover">Forgot password?</Link>
+              <Link component={RouterLink} to="/forgot-password" underline="hover">Forgot password?</Link>
             </Box>
             {error ? <Typography color="error">{error}</Typography> : null}
             <Button type="submit" variant="contained" sx={{ bgcolor: '#c62828', '&:hover': { bgcolor: '#8b1e1e' } }}>

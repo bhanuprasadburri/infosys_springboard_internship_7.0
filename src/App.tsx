@@ -1,7 +1,8 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline } from '@mui/material';
 import { AuthProvider } from './auth/AuthContext';
 import ProtectedRoute from './auth/ProtectedRoute';
+import { AppStateProvider } from './context/AppStateContext';
 import Dashboard from './pages/Dashboard';
 import Assets from './pages/Assets';
 import Incidents from './pages/Incidents';
@@ -11,6 +12,8 @@ import Compliance from './pages/Compliance';
 import DevSecOps from './pages/DevSecOps';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
+import ForgotPassword from './pages/ForgotPassword';
+import NotFound from './pages/NotFound';
 
 const theme = createTheme({
   palette: {
@@ -30,23 +33,26 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<SignUp />} />
-            <Route element={<ProtectedRoute />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/" element={<Dashboard />} />
-              <Route path="/assets" element={<Assets />} />
-              <Route path="/incidents" element={<Incidents />} />
-              <Route path="/vulnerabilities" element={<Vulnerabilities />} />
-              <Route path="/audit" element={<Audit />} />
-              <Route path="/compliance" element={<Compliance />} />
-              <Route path="/devsecops" element={<DevSecOps />} />
-            </Route>
-            <Route path="*" element={<Navigate to="/login" replace />} />
-          </Routes>
-        </BrowserRouter>
+        <AppStateProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<SignUp />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route element={<ProtectedRoute />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/" element={<Dashboard />} />
+                <Route path="/assets" element={<Assets />} />
+                <Route path="/incidents" element={<Incidents />} />
+                <Route path="/vulnerabilities" element={<Vulnerabilities />} />
+                <Route path="/audit" element={<Audit />} />
+                <Route path="/compliance" element={<Compliance />} />
+                <Route path="/devsecops" element={<DevSecOps />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AppStateProvider>
       </AuthProvider>
     </ThemeProvider>
   );
