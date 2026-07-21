@@ -20,7 +20,7 @@ export default function Compliance() {
 
   const frameworkStatus = useMemo(() => {
     const unresolvedCritical = vulnerabilities.filter((vulnerability) => vulnerability.severity === 'critical' && vulnerability.patchStatus !== 'patched').length;
-    const overdue = incidents.filter((incident) => incident.status !== 'Resolved' && incident.slaHours && incident.slaHours <= 2).length;
+    const overdue = incidents.filter((incident) => incident.status !== 'Resolved' && incident.status !== 'Closed' && incident.slaHours && incident.slaHours <= 2).length;
     return {
       pci: unresolvedCritical > 0 || overdue > 0 ? 'warning' : 'success',
       soc2: overdue > 0 ? 'warning' : 'success',
@@ -33,6 +33,12 @@ export default function Compliance() {
     { framework: 'SOC 2', status: frameworkStatus.soc2 === 'warning' ? 'Review' : 'Compliant' },
     { framework: 'ISO 27001', status: frameworkStatus.iso === 'warning' ? 'Review' : 'Compliant' },
   ], [frameworkStatus]);
+
+  const reportSummary = useMemo(() => ({
+    criticalCves: vulnerabilities.filter((vulnerability) => vulnerability.severity === 'critical' && vulnerability.patchStatus !== 'patched').length,
+    overdueIncidents: incidents.filter((incident) => incident.status !== 'Resolved' && incident.status !== 'Closed' && incident.slaHours && incident.slaHours <= 2).length,
+    auditCoverage: auditLogs.length,
+  }), [incidents, vulnerabilities, auditLogs]);
 
   const handleExport = (format: string) => {
     if (!canExport) {
@@ -92,6 +98,11 @@ export default function Compliance() {
               </Button>
             </Stack>
             <Stack spacing={1} sx={{ mt: 2 }}>
+              <Typography variant="body2" color={reportSummary.criticalCves > 0 ? 'warning.main' : 'success.main'}>Critical CVEs pending: {reportSummary.criticalCves}</Typography>
+              <Typography variant="body2" color={reportSummary.overdueIncidents > 0 ? 'warning.main' : 'success.main'}>Open SLA breaches: {reportSummary.overdueIncidents}</Typography>
+              <Typography variant="body2" color="text.secondary">Audit coverage: {reportSummary.auditCoverage} entries</Typography>
+            </Stack>
+            <Stack spacing={1} sx={{ mt: 2 }}>
               {mockPolicies.map((policy) => <Typography key={policy.id} variant="body2" color="text.secondary">{policy.name} • {policy.owner} • {policy.status}</Typography>)}
             </Stack>
             {history.length > 0 && <Stack spacing={1} sx={{ mt: 2 }}><Typography variant="subtitle2">Export History</Typography>{history.map((entry) => <Typography key={entry.id} variant="body2" color="text.secondary">{entry.name} • {entry.format} • {entry.timestamp}</Typography>)}</Stack>}
@@ -112,10 +123,10 @@ export default function Compliance() {
               </>
             ) : (
               <>
-                <Typography color="text.secondary">Open incidents: {incidents.filter((incident) => incident.status !== 'Resolved').length}</Typography>
-                <Typography color="text.secondary">Critical CVEs: {vulnerabilities.filter((vulnerability) => vulnerability.severity === 'critical' && vulnerability.patchStatus !== 'patched').length}</Typography>
+                <Typography color="text.secondary">Open incidents: {incidents.filter((incident) => incident.status !== 'Resolved' && incident.status !== 'Closed').length}</Typography>
+                <Typography color="text.secondary">Critical CVEs: {reportSummary.criticalCves}</Typography>
                 <Typography color="text.secondary">Average risk score: {(vulnerabilities.reduce((sum, vulnerability) => sum + vulnerability.riskScore, 0) / Math.max(vulnerabilities.length, 1)).toFixed(1)}</Typography>
-                <Typography color="text.secondary">Audit coverage: {auditLogs.length > 0 ? 'Complete' : 'Pending'}</Typography>
+                <Typography color="text.secondary">Audit coverage: {reportSummary.auditCoverage > 0 ? 'Complete' : 'Pending'}</Typography>
               </>
             )}
           </Stack>

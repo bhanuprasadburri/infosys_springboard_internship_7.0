@@ -22,11 +22,29 @@ export const mockMetrics: Metric[] = [
   { label: 'Network', value: 12, unit: '%', threshold: 60, status: 'healthy' },
 ];
 
-export const mockIncidents: Incident[] = [
-  { id: 'INC-2024-1247', title: 'Failed Login Attempts', severity: 'critical', sourceIp: '203.0.113.10', status: 'Open', assignedTeam: 'SOC', assignee: 'Ava Chen', eta: '12 min', createdAt: '08:40 UTC', source: 'IP 203.0.113.10', type: 'Authentication', affectedAsset: 'Identity Gateway', affectedUser: 'm.lee@acme.dev', slaHours: 2, activityLog: ['Opened by SOC automation'], recommendedActions: ['Block IP', 'Reset password', 'Notify user'], notes: [] },
+const incidentSeeds: Incident[] = [
+  { id: 'INC-2024-1247', title: 'Failed Login Attempts', severity: 'critical', sourceIp: '203.0.113.10', status: 'Open', assignedTeam: 'Security Team', assignee: 'Ava Chen', eta: '12 min', createdAt: '08:40 UTC', source: 'IP 203.0.113.10', type: 'Authentication', affectedAsset: 'Identity Gateway', affectedUser: 'm.lee@acme.dev', slaHours: 2, activityLog: ['Opened by SOC automation'], recommendedActions: ['Block IP', 'Reset password', 'Notify user'], notes: [] },
   { id: 'INC-2024-1248', title: 'Latency Spike', severity: 'high', sourceIp: '198.51.100.5', status: 'Assigned', assignedTeam: 'Network Team', assignee: 'Daniel Kim', eta: '25 min', createdAt: '08:12 UTC', source: 'IP 198.51.100.5', type: 'Network', affectedAsset: 'Edge Gateway', affectedUser: 'ops@acme.dev', slaHours: 4, activityLog: ['Assigned to Network Team'], recommendedActions: ['Block IP', 'Notify user', 'Review routing'], notes: [] },
-  { id: 'INC-2024-1249', title: 'Token Replay Alert', severity: 'medium', sourceIp: '192.0.2.77', status: 'Investigation', assignedTeam: 'IAM', assignee: 'Mina Patel', eta: '40 min', createdAt: '07:44 UTC', source: 'IP 192.0.2.77', type: 'Identity', affectedAsset: 'Authentication API', affectedUser: 's.nguyen@acme.dev', slaHours: 8, activityLog: ['Escalated for identity review'], recommendedActions: ['Block IP', 'Reset password', 'Notify user'], notes: [] },
+  { id: 'INC-2024-1249', title: 'Token Replay Alert', severity: 'medium', sourceIp: '192.0.2.77', status: 'Investigation', assignedTeam: 'Compliance Team', assignee: 'Mina Patel', eta: '40 min', createdAt: '07:44 UTC', source: 'IP 192.0.2.77', type: 'Identity', affectedAsset: 'Authentication API', affectedUser: 's.nguyen@acme.dev', slaHours: 8, activityLog: ['Escalated for identity review'], recommendedActions: ['Block IP', 'Reset password', 'Notify user'], notes: [] },
 ];
+
+export const mockIncidents: Incident[] = Array.from({ length: 23 }, (_, index) => {
+  const seed = incidentSeeds[index % incidentSeeds.length];
+  return {
+    ...seed,
+    id: `INC-2024-${1250 + index}`,
+    title: `${seed.title} ${index + 1}`,
+    severity: index % 4 === 0 ? 'critical' : index % 3 === 0 ? 'high' : index % 2 === 0 ? 'medium' : 'low',
+    status: index < 8 ? 'Open' : index < 15 ? 'Assigned' : index < 20 ? 'Investigation' : 'Open',
+    assignedTeam: index % 2 === 0 ? 'Security Team' : index % 3 === 0 ? 'Network Team' : 'DevSecOps Team',
+    assignee: index % 2 === 0 ? 'Ava Chen' : 'Daniel Kim',
+    eta: `${Math.max(12, (index + 1) * 3)} min`,
+    slaHours: Math.max(1, Math.min(8, 2 + (index % 4))),
+    activityLog: [seed.activityLog?.[0] ?? 'Created by SOC automation'],
+    recommendedActions: seed.recommendedActions,
+    notes: [],
+  };
+});
 
 export const mockVulnerabilities: Vulnerability[] = [
   { id: 'VUL-001', cveId: 'CVE-2024-2382', severity: 'critical', cvss: 9.8, affectedAssets: 11, patchStatus: 'pending', riskScore: 92, previousRiskScore: 92, lastScanSource: 'Trivy', lastScanTimestamp: '2026-07-10 08:32', affectedAssetNames: ['DB-SRV-12', 'WEB-SRV-08', 'API-SRV-11'], activityLog: [] },

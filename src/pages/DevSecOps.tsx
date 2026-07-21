@@ -26,6 +26,8 @@ export default function DevSecOps() {
       }));
   }, [auditLogs]);
 
+  const latestReview = reviewHistory[0];
+
   const summary = useMemo(() => {
     const critical = vulnerabilities.filter((vulnerability) => vulnerability.severity === 'critical' && vulnerability.patchStatus !== 'patched').length;
     const overdue = incidents.filter((incident) => incident.status !== 'Resolved' && incident.slaHours && incident.slaHours <= 2).length;
@@ -38,6 +40,7 @@ export default function DevSecOps() {
       return;
     }
     setRunningCheck(true);
+    setResult(null);
     window.setTimeout(() => {
       const findings: string[] = [];
       if (summary.critical > 0) findings.push(`${summary.critical} unresolved critical CVEs`);
@@ -67,16 +70,22 @@ export default function DevSecOps() {
           <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3, mb: 2 }}>
             <Typography variant="h6" sx={{ mb: 1.5 }}>Security Review Log</Typography>
             <Stack spacing={1}>
-              <Typography variant="body2" color="text.secondary">Last review date: {reviewHistory[0]?.timestamp ?? 'Pending'}</Typography>
-              <Typography variant="body2" color="text.secondary">Findings: {reviewHistory[0]?.findings ?? 0} findings</Typography>
+              <Typography variant="body2" color="text.secondary">Last review date: {latestReview?.timestamp ?? 'Pending'}</Typography>
+              <Typography variant="body2" color="text.secondary">Findings: {latestReview?.findings ?? 0} findings</Typography>
               <Typography variant="body2" color="text.secondary">Audit log integrity: {summary.auditIntegrity ? 'Verified' : 'Pending'}</Typography>
-              <Chip label={`Approval Status: ${reviewHistory[0]?.approved ? 'Approved' : 'Pending'}`} color={reviewHistory[0]?.approved ? 'success' : 'warning'} />
+              <Chip label={`Approval Status: ${latestReview?.approved ? 'Approved' : 'Pending'}`} color={latestReview?.approved ? 'success' : 'warning'} />
             </Stack>
           </Paper>
           <Button variant="contained" sx={{ bgcolor: '#c62828', '&:hover': { bgcolor: '#8b1e1e' } }} onClick={runCheck} disabled={runningCheck || !canReview}>
             {runningCheck ? <CircularProgress size={16} sx={{ mr: 1 }} /> : null}
             {runningCheck ? 'Running compliance check...' : 'Compliance Check'}
           </Button>
+          {result ? (
+            <Paper elevation={0} sx={{ p: 2, mt: 2, bgcolor: result.passed ? 'rgba(46, 125, 50, 0.12)' : 'rgba(237, 108, 2, 0.14)', borderRadius: 3 }}>
+              <Typography variant="subtitle2" color={result.passed ? 'success.main' : 'warning.main'}>{result.summary}</Typography>
+              {result.findings.map((finding) => <Typography key={finding} variant="body2" color="text.secondary">• {finding}</Typography>)}
+            </Paper>
+          ) : null}
           <Paper elevation={0} sx={{ p: 2, mt: 2, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 3 }}>
             <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Security Reviews</Typography>
             {reviewHistory.length === 0 ? (

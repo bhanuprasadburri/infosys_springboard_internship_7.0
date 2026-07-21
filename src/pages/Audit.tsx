@@ -13,9 +13,11 @@ export default function Audit() {
   const { auditLogs } = useAppState();
   const [actionFilter, setActionFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
 
   const filteredLogs = useMemo(() => {
+    const search = searchTerm.trim().toLowerCase();
     const byAction = actionFilter === 'all' ? auditLogs : auditLogs.filter((entry) => entry.action === actionFilter);
     const now = new Date();
     const byDate = dateFilter === 'today'
@@ -27,8 +29,8 @@ export default function Audit() {
             return diff <= 7 * 24 * 60 * 60 * 1000;
           })
         : byAction;
-    return byDate;
-  }, [actionFilter, auditLogs, dateFilter]);
+    return byDate.filter((entry) => !search || [entry.action, entry.user, entry.source].some((value) => value.toLowerCase().includes(search)));
+  }, [actionFilter, auditLogs, dateFilter, searchTerm]);
 
   const pageCount = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE));
   const pagedLogs = filteredLogs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
@@ -47,6 +49,7 @@ export default function Audit() {
           </Box>
           <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
+              <TextField label="Search log" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} size="small" sx={{ minWidth: 220 }} />
               <TextField select label="Action" value={actionFilter} onChange={(e) => { setActionFilter(e.target.value); setPage(1); }} size="small" sx={{ minWidth: 180 }}>
                 <MenuItem value="all">All</MenuItem>
                 {Array.from(new Set(auditLogs.map((entry) => entry.action))).map((action) => (

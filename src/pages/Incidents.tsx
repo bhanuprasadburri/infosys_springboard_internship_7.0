@@ -21,6 +21,18 @@ const defaultSlaHours = (severity: Incident['severity']) => {
   return 8;
 };
 
+const getEtaLabel = (incident: Incident) => {
+  const slaHours = incident.slaHours ?? defaultSlaHours(incident.severity);
+  const label = `${slaHours}h`;
+  return incident.status === 'Resolved' || incident.status === 'Closed' ? `Closed · ${label}` : `ETA ${label}`;
+};
+
+const getCountdownText = (incident: Incident) => {
+  if (incident.status === 'Resolved' || incident.status === 'Closed') return 'Resolved';
+  const slaHours = incident.slaHours ?? defaultSlaHours(incident.severity);
+  return `${Math.max(1, slaHours * 60 - 12)}m remaining`;
+};
+
 export default function Incidents() {
   const { incidents, updateIncident, addAuditLog } = useAppState();
   const { user } = useAuth();
@@ -31,18 +43,45 @@ export default function Incidents() {
   const canReview = canPerformAction(user, 'review');
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [assignIncident, setAssignIncident] = useState<Incident | null>(null);
+  const [closeConfirmIncident, setCloseConfirmIncident] = useState<Incident | null>(null);
   const [team, setTeam] = useState('Security Team');
   const [assignee, setAssignee] = useState('Ava Chen');
   const [slaHours, setSlaHours] = useState(4);
   const [notes, setNotes] = useState('');
+  const [resolutionNote, setResolutionNote] = useState('');
+  const [severityFilter, setSeverityFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [teamFilter, setTeamFilter] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
   const [toast, setToast] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
 
   const summary = useMemo(() => {
-    const active = incidents.filter((incident) => incident.status !== 'Resolved').length;
-    const resolved = incidents.filter((incident) => incident.status === 'Resolved').length;
-    return { active, resolved, mttr: '47 min' };
+    const active = incidents.filter((incident) => incident.status !== 'Resolved' && incident.status !== 'Closed').length;
+    const resolved = incidents.filter((incident) => incident.status === 'Resolved' || incident.status === 'Closed').length;
+    const resolvedIncidents = incidents.filter((incident) => incident.status === 'Resolved' || incident.status === 'Closed');
+    const mttr = resolvedIncidents.length > 0
+      ? Math.round(resolvedIncidents.reduce((total, incident) => total + (incident.resolutionMinutes ?? 47), 0) / resolvedIncidents.length)
+      : 47;
+    return { active, resolved, mttr: `${mttr} min` };
   }, [incidents]);
+
+  const visibleIncidents = useMemo(() => {
+    const search = searchTerm.trim().toLowerCase();
+    const filtered = incidents.filter((incident) => {
+      const matchesSeverity = severityFilter === 'all' || incident.severity === severityFilter;
+      const matchesStatus = statusFilter === 'all' || incident.status === statusFilter;
+      const matchesTeam = teamFilter === 'all' || incident.assignedTeam === teamFilter;
+      const matchesSearch = !search || [incident.id, incident.title, incident.sourceIp, incident.assignedTeam, incident.assignee].some((value) => value?.toLowerCase().includes(search));
+      return matchesSeverity && matchesStatus && matchesTeam && matchesSearch;
+    });
+
+    return filtered.sort((left, right) => {
+      const leftPriority = (left.slaHours ?? defaultSlaHours(left.severity)) * 60;
+      const rightPriority = (right.slaHours ?? defaultSlaHours(right.severity)) * 60;
+      return leftPriority - rightPriority;
+    });
+  }, [incidents, searchTerm, severityFilter, statusFilter, teamFilter]);
 
   const applyIncidentUpdate = (incidentId: string, updater: (incident: Incident) => Incident) => {
     const currentIncident = incidents.find((incident) => incident.id === incidentId) ?? selectedIncident;
@@ -54,22 +93,26 @@ export default function Incidents() {
     }
   };
 
+  const logIncidentAction = (action: string) => {
+    addAuditLog({
+      id: `AUD-${Date.now()}`,
+      action,
+      user: user?.fullName ?? 'Unknown',
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      date: new Date().toISOString().slice(0, 10),
+      source: 'Incidents',
+    });
+  };
+
   const openInvestigate = (incident: Incident) => {
     setSelectedIncident(incident);
-    if (incident.status === 'Open' && canInvestigate) {
+    if ((incident.status === 'Open' || incident.status === 'Assigned') && canInvestigate) {
       applyIncidentUpdate(incident.id, (current) => ({
         ...current,
         status: 'Investigation',
         activityLog: [...(current.activityLog ?? []), 'Opened investigation workflow'],
       }));
-      addAuditLog({
-        id: `AUD-${Date.now()}`,
-        action: `Investigation started for ${incident.id}`,
-        user: user?.fullName ?? 'Unknown',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: new Date().toISOString().slice(0, 10),
-        source: 'Incidents',
-      });
+      logIncidentAction(`Investigation started for ${incident.id}`);
     }
   };
 
@@ -94,18 +137,11 @@ export default function Incidents() {
         assignee,
         eta: `${slaHours}h`,
         slaHours,
-        status: assignIncident.status === 'Resolved' ? 'Resolved' : assignIncident.status === 'Assigned' || assignIncident.status === 'Investigation' ? assignIncident.status : 'Assigned',
+        status: assignIncident.status === 'Resolved' || assignIncident.status === 'Closed' ? assignIncident.status : 'Assigned',
         activityLog: [...(assignIncident.activityLog ?? []), `Assigned to ${team} (${assignee}) — SLA: ${slaHours}h`],
       } as Incident;
       updateIncident(assignIncident.id, () => nextIncident);
-      addAuditLog({
-        id: `AUD-${Date.now()}`,
-        action: `Assigned ${assignIncident.id} to ${team}`,
-        user: user?.fullName ?? 'Unknown',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: new Date().toISOString().slice(0, 10),
-        source: 'Incidents',
-      });
+      logIncidentAction(`Assigned ${assignIncident.id} to ${team}`);
       if (selectedIncident?.id === assignIncident.id) {
         setSelectedIncident(nextIncident);
       }
@@ -123,14 +159,7 @@ export default function Incidents() {
       notes: [...(current.notes ?? []), note],
       activityLog: [...(current.activityLog ?? []), `Note added: ${note.text}`],
     }));
-    addAuditLog({
-      id: `AUD-${Date.now()}`,
-      action: `Note added to ${selectedIncident.id}`,
-      user: user?.fullName ?? 'Unknown',
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      date: new Date().toISOString().slice(0, 10),
-      source: 'Incidents',
-    });
+    logIncidentAction(`Note added to ${selectedIncident.id}`);
     setNotes('');
     setToast({ open: true, message: `📝 Note added to ${selectedIncident.id}` });
   };
@@ -146,14 +175,7 @@ export default function Incidents() {
         ...current,
         activityLog: [...(current.activityLog ?? []), `✅ ${action} executed at ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`],
       }));
-      addAuditLog({
-        id: `AUD-${Date.now()}`,
-        action: `${action} executed for ${incident.id}`,
-        user: user?.fullName ?? 'Unknown',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: new Date().toISOString().slice(0, 10),
-        source: 'Incidents',
-      });
+      logIncidentAction(`${action} executed for ${incident.id}`);
       setLoadingAction(null);
       setToast({ open: true, message: `✅ ${action} executed for ${incident.id}` });
     }, 1000);
@@ -170,16 +192,10 @@ export default function Incidents() {
         ...current,
         status: 'Resolved',
         resolvedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        resolutionMinutes: Math.max(10, Math.min(95, (current.slaHours ?? defaultSlaHours(current.severity)) * 8 + 7)),
         activityLog: [...(current.activityLog ?? []), 'Resolved by incident workflow'],
       }));
-      addAuditLog({
-        id: `AUD-${Date.now()}`,
-        action: `Resolved ${incident.id}`,
-        user: user?.fullName ?? 'Unknown',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: new Date().toISOString().slice(0, 10),
-        source: 'Incidents',
-      });
+      logIncidentAction(`Resolved ${incident.id}`);
       setLoadingAction(null);
       setSelectedIncident(null);
       setToast({ open: true, message: `✅ ${incident.id} marked as resolved` });
@@ -191,24 +207,37 @@ export default function Incidents() {
       setToast({ open: true, message: 'Permission denied: cannot close incidents.' });
       return;
     }
-    setLoadingAction(`${incident.id}-close`);
+    setCloseConfirmIncident(incident);
+    setResolutionNote('');
+  };
+
+  const confirmCloseIncident = () => {
+    if (!closeConfirmIncident) return;
+    if (!resolutionNote.trim()) {
+      setToast({ open: true, message: 'Resolution note is required before closing an incident.' });
+      return;
+    }
+    if (!canClose) {
+      setToast({ open: true, message: 'Permission denied: cannot close incidents.' });
+      return;
+    }
+    setLoadingAction(`${closeConfirmIncident.id}-close`);
     window.setTimeout(() => {
-      applyIncidentUpdate(incident.id, (current) => ({
+      const note: IncidentNote = { id: `${Date.now()}`, text: resolutionNote.trim(), timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) };
+      applyIncidentUpdate(closeConfirmIncident.id, (current) => ({
         ...current,
         status: 'Closed',
-        activityLog: [...(current.activityLog ?? []), 'Closed by incident workflow'],
+        resolvedAt: current.resolvedAt ?? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        resolutionMinutes: current.resolutionMinutes ?? Math.max(10, Math.min(95, (current.slaHours ?? defaultSlaHours(current.severity)) * 8 + 7)),
+        notes: [...(current.notes ?? []), note],
+        activityLog: [...(current.activityLog ?? []), `Closed with resolution note: ${note.text}`],
       }));
-      addAuditLog({
-        id: `AUD-${Date.now()}`,
-        action: `Closed ${incident.id}`,
-        user: user?.fullName ?? 'Unknown',
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        date: new Date().toISOString().slice(0, 10),
-        source: 'Incidents',
-      });
+      logIncidentAction(`Closed ${closeConfirmIncident.id}`);
       setLoadingAction(null);
+      setCloseConfirmIncident(null);
+      setResolutionNote('');
       setSelectedIncident(null);
-      setToast({ open: true, message: `✅ ${incident.id} closed successfully` });
+      setToast({ open: true, message: `✅ ${closeConfirmIncident.id} closed successfully` });
     }, 1000);
   };
 
@@ -230,19 +259,44 @@ export default function Incidents() {
               {['Open', 'Assigned', 'Investigation', 'Resolved'].map((stage) => <Chip key={stage} label={stage} color={stage === 'Resolved' ? 'success' : stage === 'Investigation' ? 'warning' : stage === 'Assigned' ? 'info' : 'error'} />)}
             </Stack>
           </Paper>
+          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
+            <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
+              <TextField label="Search incidents" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} size="small" sx={{ minWidth: 220 }} />
+              <TextField select label="Severity" value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)} size="small" sx={{ minWidth: 150 }}>
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="critical">Critical</MenuItem>
+                <MenuItem value="high">High</MenuItem>
+                <MenuItem value="medium">Medium</MenuItem>
+                <MenuItem value="low">Low</MenuItem>
+              </TextField>
+              <TextField select label="Status" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} size="small" sx={{ minWidth: 150 }}>
+                <MenuItem value="all">All</MenuItem>
+                <MenuItem value="Open">Open</MenuItem>
+                <MenuItem value="Assigned">Assigned</MenuItem>
+                <MenuItem value="Investigation">Investigation</MenuItem>
+                <MenuItem value="Resolved">Resolved</MenuItem>
+                <MenuItem value="Closed">Closed</MenuItem>
+              </TextField>
+              <TextField select label="Assigned team" value={teamFilter} onChange={(e) => setTeamFilter(e.target.value)} size="small" sx={{ minWidth: 180 }}>
+                <MenuItem value="all">All</MenuItem>
+                {teamOptions.map((option) => <MenuItem key={option.team} value={option.team}>{option.team}</MenuItem>)}
+              </TextField>
+            </Stack>
+          </Paper>
           <DataTable<Incident>
             title="Incidents"
             columns={['ID', 'Severity', 'Type', 'Source IP', 'Status', 'Assigned Team', 'SLA/ETA', 'Action']}
-            rows={incidents}
+            rows={visibleIncidents}
+            emptyText="No incidents match your filters"
             renderRow={(incident) => (
               <>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{incident.id}</TableCell>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Chip label={incident.severity} color={incident.severity === 'critical' ? 'error' : incident.severity === 'high' ? 'warning' : 'success'} size="small" /></TableCell>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{incident.title}</TableCell>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{incident.sourceIp}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Chip label={incident.status} color={incident.status === 'Resolved' ? 'success' : incident.status === 'Assigned' ? 'warning' : incident.status === 'Investigation' ? 'info' : 'error'} size="small" /></TableCell>
+                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Chip label={incident.status} color={incident.status === 'Resolved' || incident.status === 'Closed' ? 'success' : incident.status === 'Assigned' ? 'warning' : incident.status === 'Investigation' ? 'info' : 'error'} size="small" /></TableCell>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{incident.assignedTeam}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255.08)' }}>{incident.eta}</TableCell>
+                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Stack spacing={0.5}>{getEtaLabel(incident)}<Typography variant="caption" color="text.secondary">{getCountdownText(incident)}</Typography></Stack></TableCell>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Stack direction="row" spacing={1}><Button size="small" variant="outlined" onClick={() => openInvestigate(incident)} disabled={!canInvestigate}>Investigate</Button><Button size="small" variant="outlined" onClick={() => openAssignDialog(incident)} disabled={!canAssign}>Assign</Button></Stack></TableCell>
               </>
             )}
@@ -257,7 +311,7 @@ export default function Incidents() {
                 <Typography variant="h6">{selectedIncident.id}</Typography>
                 <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
                   <Chip label={selectedIncident.severity} color={selectedIncident.severity === 'critical' || selectedIncident.severity === 'high' ? 'error' : selectedIncident.severity === 'medium' ? 'warning' : 'success'} size="small" />
-                  <Chip label={selectedIncident.status} color={selectedIncident.status === 'Resolved' ? 'success' : selectedIncident.status === 'Investigation' ? 'info' : selectedIncident.status === 'Assigned' ? 'warning' : 'error'} size="small" />
+                  <Chip label={selectedIncident.status} color={selectedIncident.status === 'Resolved' || selectedIncident.status === 'Closed' ? 'success' : selectedIncident.status === 'Investigation' ? 'info' : selectedIncident.status === 'Assigned' ? 'warning' : 'error'} size="small" />
                 </Stack>
               </Box>
               <Box>
@@ -310,7 +364,7 @@ export default function Incidents() {
                   ))}
                 </Stack>
               </Box>
-              {selectedIncident.status === 'Resolved' ? (
+              {selectedIncident.status === 'Resolved' || selectedIncident.status === 'Closed' ? (
                 <Button variant="contained" color="success" onClick={() => closeIncident(selectedIncident)} disabled={!canClose || Boolean(loadingAction && loadingAction === `${selectedIncident.id}-close`)}>
                   {loadingAction === `${selectedIncident.id}-close` ? <CircularProgress size={16} sx={{ mr: 1 }} /> : null}
                   Close Incident
@@ -341,10 +395,24 @@ export default function Incidents() {
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setAssignIncident(null)} disabled={Boolean(loadingAction)} >Cancel</Button>
+          <Button onClick={() => setAssignIncident(null)} disabled={Boolean(loadingAction)}>Cancel</Button>
           <Button onClick={handleAssignConfirm} variant="contained" disabled={Boolean(loadingAction)}>
             {loadingAction === assignIncident?.id ? <CircularProgress size={16} sx={{ mr: 1 }} /> : null}
             Confirm Assignment
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={Boolean(closeConfirmIncident)} onClose={() => !loadingAction && setCloseConfirmIncident(null)}>
+        <DialogTitle>Close Incident — {closeConfirmIncident?.id}</DialogTitle>
+        <DialogContent>
+          <Typography color="text.secondary" sx={{ mb: 2 }}>Add a resolution note before closing the incident.</Typography>
+          <TextField fullWidth multiline minRows={3} label="Resolution note" value={resolutionNote} onChange={(e) => setResolutionNote(e.target.value)} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCloseConfirmIncident(null)} disabled={Boolean(loadingAction)}>Cancel</Button>
+          <Button onClick={confirmCloseIncident} variant="contained" color="success" disabled={Boolean(loadingAction)}>
+            {loadingAction === `${closeConfirmIncident?.id}-close` ? <CircularProgress size={16} sx={{ mr: 1 }} /> : null}
+            Confirm Close
           </Button>
         </DialogActions>
       </Dialog>

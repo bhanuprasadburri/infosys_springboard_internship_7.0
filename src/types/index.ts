@@ -47,6 +47,7 @@ export interface Incident {
   createdAt: string;
   resolvedAt?: string;
   slaHours?: number;
+  resolutionMinutes?: number;
   source?: string;
   type?: string;
   affectedAsset?: string;

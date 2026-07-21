@@ -144,6 +144,7 @@ export default function Vulnerabilities() {
             title="Known CVEs"
             columns={['CVE', 'Severity', 'CVSS', 'Affected Assets', 'Patch Status', 'Risk Score', 'Last Scan', 'Action']}
             rows={pagedVulnerabilities}
+            emptyText="No vulnerabilities match your filters"
             renderRow={(vulnerability) => (
               <>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{vulnerability.cveId}</TableCell>
