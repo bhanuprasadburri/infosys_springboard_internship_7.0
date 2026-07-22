@@ -1,5 +1,6 @@
-import { createContext, useContext, useMemo, useState, type Dispatch, type ReactNode, type SetStateAction } from 'react';
+import { createContext, useContext, useMemo, useState, useEffect, type Dispatch, type ReactNode, type SetStateAction } from 'react';
 import { mockAlerts, mockAssets, mockAuditLogs, mockIncidents, mockMetrics, mockVulnerabilities } from '../data/mockAssets';
+import { apiClient } from '../api/client';
 import type { Alert, Asset, AuditLog, Incident, Metric, Vulnerability } from '../types';
 
 interface AppStateContextValue {
@@ -28,28 +29,77 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>(() => mockAuditLogs.map((auditLog) => ({ ...auditLog })));
   const [metrics, setMetrics] = useState<Metric[]>(() => mockMetrics.map((metric) => ({ ...metric })));
 
+  // Initialize from backend
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        const [backendAssets, backendAlerts, backendIncidents, backendVulnerabilities, backendAuditLogs, backendMetrics] = await Promise.all([
+          apiClient.getAssets().catch(() => mockAssets),
+          apiClient.getAlerts().catch(() => mockAlerts),
+          apiClient.getIncidents().catch(() => mockIncidents),
+          apiClient.getVulnerabilities().catch(() => mockVulnerabilities),
+          apiClient.getAuditLogs().catch(() => mockAuditLogs),
+          apiClient.getMetrics().catch(() => mockMetrics),
+        ]);
+        setAssets(backendAssets || mockAssets);
+        setAlerts(backendAlerts || mockAlerts);
+        setIncidents(backendIncidents || mockIncidents);
+        setVulnerabilities(backendVulnerabilities || mockVulnerabilities);
+        setAuditLogs(backendAuditLogs || mockAuditLogs);
+        setMetrics(backendMetrics || mockMetrics);
+      } catch (error) {
+        console.warn('Backend unavailable, using mock data:', error);
+      }
+    };
+    loadData();
+  }, []);
+
   const updateAsset = (assetId: string, updater: (asset: Asset) => Asset) => {
-    setAssets((prev) => prev.map((asset) => (asset.id === assetId ? updater(asset) : asset)));
+    setAssets((prev) => {
+      const next = prev.map((asset) => (asset.id === assetId ? updater(asset) : asset));
+      const updated = next.find((a) => a.id === assetId);
+      if (updated) {
+        apiClient.updateAsset(assetId, updated).catch((error) => console.error('Failed to update asset:', error));
+      }
+      return next;
+    });
   };
 
   const updateIncident = (incidentId: string, updater: (incident: Incident) => Incident) => {
-    setIncidents((prev) => prev.map((incident) => (incident.id === incidentId ? updater(incident) : incident)));
+    setIncidents((prev) => {
+      const next = prev.map((incident) => (incident.id === incidentId ? updater(incident) : incident));
+      const updated = next.find((i) => i.id === incidentId);
+      if (updated) {
+        apiClient.updateIncident(incidentId, updated).catch((error) => console.error('Failed to update incident:', error));
+      }
+      return next;
+    });
   };
 
   const updateVulnerability = (vulnerabilityId: string, updater: (vulnerability: Vulnerability) => Vulnerability) => {
-    setVulnerabilities((prev) => prev.map((vulnerability) => (vulnerability.id === vulnerabilityId ? updater(vulnerability) : vulnerability)));
+    setVulnerabilities((prev) => {
+      const next = prev.map((vulnerability) => (vulnerability.id === vulnerabilityId ? updater(vulnerability) : vulnerability));
+      const updated = next.find((v) => v.id === vulnerabilityId);
+      if (updated) {
+        apiClient.updateVulnerability(vulnerabilityId, updated).catch((error) => console.error('Failed to update vulnerability:', error));
+      }
+      return next;
+    });
   };
 
   const addAlert = (alert: Alert) => {
     setAlerts((prev) => [alert, ...prev]);
+    apiClient.createAlert(alert).catch((error) => console.error('Failed to create alert:', error));
   };
 
   const addIncident = (incident: Incident) => {
     setIncidents((prev) => [incident, ...prev]);
+    apiClient.createIncident(incident).catch((error) => console.error('Failed to create incident:', error));
   };
 
   const addAuditLog = (auditLog: AuditLog) => {
     setAuditLogs((prev) => [auditLog, ...prev]);
+    apiClient.createAuditLog(auditLog).catch((error) => console.error('Failed to create audit log:', error));
   };
 
   const value = useMemo(

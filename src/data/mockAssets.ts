@@ -1,4 +1,4 @@
-import type { Asset, Alert, AuditLog, ComplianceReport, Incident, Metric, Policy, Report, Vulnerability } from '../types';
+import type { Asset, Alert, AuditLog, ComplianceReport, Incident, Metric, Policy, Report, Vulnerability, VulnerabilityStatus, AlertSeverity } from '../types';
 
 export const mockAssets: Asset[] = [
   { id: 'AS-1001', name: 'DB-SRV-12', type: 'server', environment: 'Production', status: 'critical', cpu: 94, memory: 81, disk: 67, network: 32, allocatedCapacity: 24, lastChecked: '2m ago', provider: 'AWS' },
@@ -46,11 +46,40 @@ export const mockIncidents: Incident[] = Array.from({ length: 23 }, (_, index) =
   };
 });
 
-export const mockVulnerabilities: Vulnerability[] = [
-  { id: 'VUL-001', cveId: 'CVE-2024-2382', severity: 'critical', cvss: 9.8, affectedAssets: 11, patchStatus: 'pending', riskScore: 92, previousRiskScore: 92, lastScanSource: 'Trivy', lastScanTimestamp: '2026-07-10 08:32', affectedAssetNames: ['DB-SRV-12', 'WEB-SRV-08', 'API-SRV-11'], activityLog: [] },
-  { id: 'VUL-002', cveId: 'CVE-2024-2143', severity: 'high', cvss: 8.7, affectedAssets: 6, patchStatus: 'tested', riskScore: 84, previousRiskScore: 84, lastScanSource: 'SonarQube', lastScanTimestamp: '2026-07-09 06:15', affectedAssetNames: ['APP-SRV-03', 'CACHE-CLD-01'], activityLog: [] },
-  { id: 'VUL-003', cveId: 'CVE-2023-5038', severity: 'medium', cvss: 6.1, affectedAssets: 3, patchStatus: 'available', riskScore: 61, previousRiskScore: 61, lastScanSource: 'Trivy', lastScanTimestamp: '2026-07-08 15:05', affectedAssetNames: ['K8S-POD-44'], activityLog: [] },
+const vulnSeeds = [
+  { cveId: 'CVE-2024-2382', severity: 'critical' as AlertSeverity, cvss: 9.8, source: 'Trivy', assets: ['DB-SRV-12', 'WEB-SRV-08', 'API-SRV-11'] },
+  { cveId: 'CVE-2024-2143', severity: 'high' as AlertSeverity, cvss: 8.7, source: 'SonarQube', assets: ['APP-SRV-03', 'CACHE-CLD-01'] },
+  { cveId: 'CVE-2023-5038', severity: 'medium' as AlertSeverity, cvss: 6.1, source: 'Trivy', assets: ['K8S-POD-44'] },
+  { cveId: 'CVE-2024-3847', severity: 'critical' as AlertSeverity, cvss: 9.5, source: 'OpenVAS', assets: ['API-SRV-11', 'K8S-POD-44'] },
+  { cveId: 'CVE-2024-4102', severity: 'high' as AlertSeverity, cvss: 8.2, source: 'Nessus', assets: ['WEB-SRV-08', 'CACHE-CLD-01'] },
+  { cveId: 'CVE-2024-5012', severity: 'medium' as AlertSeverity, cvss: 7.1, source: 'Trivy', assets: ['DB-SRV-12'] },
+  { cveId: 'CVE-2024-5567', severity: 'low' as AlertSeverity, cvss: 4.3, source: 'SonarQube', assets: ['APP-SRV-03'] },
+  { cveId: 'CVE-2024-6234', severity: 'critical' as AlertSeverity, cvss: 9.9, source: 'OpenVAS', assets: ['K8S-POD-44', 'API-SRV-11', 'WEB-SRV-08'] },
+  { cveId: 'CVE-2024-6891', severity: 'high' as AlertSeverity, cvss: 8.5, source: 'Nessus', assets: ['DB-SRV-12', 'CACHE-CLD-01'] },
+  { cveId: 'CVE-2024-7341', severity: 'medium' as AlertSeverity, cvss: 6.8, source: 'Trivy', assets: ['APP-SRV-03', 'WEB-SRV-08'] },
 ];
+
+export const mockVulnerabilities: Vulnerability[] = Array.from({ length: 20 }, (_, index) => {
+  const seed = vulnSeeds[index % vulnSeeds.length];
+  const statuses: VulnerabilityStatus[] = ['available', 'tested', 'pending', 'patched'];
+  const status = statuses[index % 4];
+  const baseRisk = seed.severity === 'critical' ? 90 : seed.severity === 'high' ? 70 : seed.severity === 'medium' ? 50 : 30;
+  const riskScore = Math.max(1, baseRisk - (status === 'patched' ? 40 : status === 'tested' ? 15 : 0));
+  return {
+    id: `VUL-${String(index + 1).padStart(3, '0')}`,
+    cveId: `${seed.cveId.split('-')[0]}-${seed.cveId.split('-')[1]}-${2024 + Math.floor(index / 10)}`,
+    severity: seed.severity,
+    cvss: Math.round((seed.cvss + (index * 0.1) % 0.5) * 10) / 10,
+    affectedAssets: Math.max(1, seed.assets.length + (index % 3)),
+    patchStatus: status,
+    riskScore,
+    previousRiskScore: status === 'patched' ? riskScore + 40 : riskScore,
+    lastScanSource: seed.source,
+    lastScanTimestamp: `2026-07-${String(Math.max(1, 21 - index)).padStart(2, '0')} ${String(8 + (index % 8)).padStart(2, '0')}:${String(32 - (index % 60)).padStart(2, '0')}`,
+    affectedAssetNames: seed.assets,
+    activityLog: status === 'patched' ? ['Patched successfully', `Risk reduced from ${riskScore + 40} to ${riskScore}`] : [],
+  };
+});
 
 export const mockAuditLogs: AuditLog[] = [
   { id: 'LOG-001', action: 'Login Granted', user: 'Ava Chen', timestamp: '2026-07-11 09:12', date: '2026-07-11', source: '10.10.1.21' },

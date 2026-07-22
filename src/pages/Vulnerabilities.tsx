@@ -26,10 +26,10 @@ export default function Vulnerabilities() {
   const [toast, setToast] = useState<{ open: boolean; message: string }>({ open: false, message: '' });
 
   const summary = useMemo(() => {
-    const patched = vulnerabilities.filter((vulnerability) => vulnerability.patchStatus === 'patched').length;
+    const criticalPatched = vulnerabilities.filter((vulnerability) => vulnerability.severity === 'critical' && vulnerability.patchStatus === 'patched').length;
     const pending = vulnerabilities.filter((vulnerability) => vulnerability.patchStatus === 'pending').length;
     const riskScore = vulnerabilities.reduce((total, vulnerability) => total + vulnerability.riskScore, 0) / Math.max(vulnerabilities.length, 1);
-    return { patched, pending, riskScore: riskScore.toFixed(1) };
+    return { criticalPatched, pending, riskScore: riskScore.toFixed(1) };
   }, [vulnerabilities]);
 
   const filteredVulnerabilities = useMemo(() => {
@@ -108,7 +108,7 @@ export default function Vulnerabilities() {
           <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Risk Assessment & Patching</Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2, mb: 3 }}>
             <StatCard title="Vulnerabilities Tracked" value={vulnerabilities.length.toString()} subtitle="Current" />
-            <StatCard title="Critical Patched" value={summary.patched.toString()} subtitle="This quarter" />
+            <StatCard title="Critical Patched" value={summary.criticalPatched.toString()} subtitle="This quarter" />
             <StatCard title="Risk Score" value={summary.riskScore} subtitle="Average" />
           </Box>
           <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>

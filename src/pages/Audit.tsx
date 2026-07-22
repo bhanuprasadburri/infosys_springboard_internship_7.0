@@ -1,4 +1,4 @@
-import { Box, MenuItem, Paper, Stack, TableCell, TextField, Typography, Pagination } from '@mui/material';
+import { Box, MenuItem, Paper, Stack, TableCell, TextField, Typography, Pagination, Chip } from '@mui/material';
 import { useMemo, useState } from 'react';
 import Sidebar from '../components/Sidebar';
 import TopBar from '../components/TopBar';
@@ -15,6 +15,21 @@ export default function Audit() {
   const [dateFilter, setDateFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [page, setPage] = useState(1);
+
+  const summary = useMemo(() => {
+    const criticalActions = auditLogs.filter((entry) => 
+      entry.action.includes('Escalated') || 
+      entry.action.includes('Patched') || 
+      entry.action.includes('Resolved') ||
+      entry.action.includes('closed')
+    ).length;
+    const failedAttempts = auditLogs.filter((entry) => entry.action.toLowerCase().includes('failed')).length;
+    return { 
+      total: auditLogs.length, 
+      criticalActions,
+      failedAttempts
+    };
+  }, [auditLogs]);
 
   const filteredLogs = useMemo(() => {
     const search = searchTerm.trim().toLowerCase();
@@ -35,6 +50,12 @@ export default function Audit() {
   const pageCount = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE));
   const pagedLogs = filteredLogs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
+  const getActionChipColor = (action: string) => {
+    if (action.includes('Escalated') || action.includes('Patched') || action.includes('Resolved')) return 'warning';
+    if (action.includes('failed') || action.toLowerCase().includes('violation')) return 'error';
+    return 'success';
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', bgcolor: '#050b13', color: '#f5f7fa' }}>
       <TopBar />
@@ -43,9 +64,9 @@ export default function Audit() {
         <Box component="main" sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
           <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Audit Log Integrity</Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2, mb: 3 }}>
-            <StatCard title="Audit Logs" value="24.7M" subtitle="Entries" />
-            <StatCard title="Retention" value="7 years" subtitle="Compliance" />
-            <StatCard title="Encrypted" value="100%" subtitle="At rest" />
+            <StatCard title="Total Entries" value={summary.total.toString()} subtitle="Audit trail" />
+            <StatCard title="Critical Actions" value={summary.criticalActions.toString()} subtitle="Escalations/patches" />
+            <StatCard title="Failed Attempts" value={summary.failedAttempts.toString()} subtitle="Security events" />
           </Box>
           <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
@@ -71,7 +92,9 @@ export default function Audit() {
             renderRow={(entry) => (
               <>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.id}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.action}</TableCell>
+                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>
+                  <Chip label={entry.action} size="small" color={getActionChipColor(entry.action)} />
+                </TableCell>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.user}</TableCell>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.timestamp}</TableCell>
                 <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.source}</TableCell>
