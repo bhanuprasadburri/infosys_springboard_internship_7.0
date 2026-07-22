@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
 import type { User } from '../types';
+import { clearSession, readSession } from '../utils/authUtils';
 
 interface AuthContextValue {
   user: User | null;
+  authMode: 'admin' | 'user' | null;
   login: (email: string, password: string) => boolean;
   signup: (fullName: string, email: string, password: string, role: User['role']) => boolean;
   logout: () => void;
@@ -11,72 +13,63 @@ interface AuthContextValue {
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-const demoUser: User = {
-  id: 'u-1',
-  fullName: 'Ava Chen',
-  email: 'ava@sentinelcore.com',
-  role: 'Security Admin',
-};
-
-const formatFullName = (email: string) => {
-  const name = email.split('@')[0].replace(/[._-]+/g, ' ');
-  return name
-    .split(' ')
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(' ');
-};
-
-const STORAGE_KEY = 'sentinelcore-auth';
-
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [authMode, setAuthMode] = useState<'admin' | 'user' | null>(null);
 
   useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as User;
-        setUser(parsed);
-      } catch {
-        window.localStorage.removeItem(STORAGE_KEY);
-      }
+    const session = readSession();
+    if (session?.user) {
+      setUser(session.user);
+      setAuthMode(session.mode);
     }
   }, []);
 
-  const persistUser = (nextUser: User | null) => {
+  const persistUser = (nextUser: User | null, mode: 'admin' | 'user' | null = null) => {
     setUser(nextUser);
-    if (nextUser) {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextUser));
+    setAuthMode(mode);
+    if (nextUser && mode) {
+      localStorage.setItem('sentinelcore-auth-session', JSON.stringify({ user: nextUser, token: `${mode}-token`, mode, expiresAt: Date.now() + 1000 * 60 * 60 * 8 }));
+      localStorage.setItem('sentinelcore-auth-mode', mode);
     } else {
-      window.localStorage.removeItem(STORAGE_KEY);
+      clearSession();
     }
   };
 
   const login = (email: string, password: string) => {
-    if (email && password) {
-      const existingUser = email === demoUser.email ? demoUser : null;
-      persistUser(existingUser ?? {
-        id: crypto.randomUUID(),
-        fullName: formatFullName(email),
-        email,
-        role: 'Viewer',
-      });
+    if (!email || !password) return false;
+    const normalizedEmail = email.trim().toLowerCase();
+    if (normalizedEmail === 'bhanu@gmail.com' && password === 'Bhanu@') {
+      const adminUser = { id: 'admin-1', fullName: 'Admin User', email: normalizedEmail, role: 'Security Admin' as const };
+      persistUser(adminUser, 'admin');
+      return true;
+    }
+    const storedUsers = localStorage.getItem('sentinelcore-users');
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    const matchedUser = users.find((entry: { email: string; password: string }) => entry.email === normalizedEmail && entry.password === password);
+    if (matchedUser) {
+      persistUser({ id: matchedUser.id, fullName: matchedUser.fullName, email: matchedUser.email, role: 'Viewer' as const }, 'user');
       return true;
     }
     return false;
   };
 
   const signup = (fullName: string, email: string, password: string, role: User['role']) => {
-    if (fullName && email && password) {
-      persistUser({ id: crypto.randomUUID(), fullName, email, role });
-      return true;
-    }
-    return false;
+    if (!fullName || !email || !password) return false;
+    const normalizedEmail = email.trim().toLowerCase();
+    const storedUsers = localStorage.getItem('sentinelcore-users');
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    if (users.some((entry: { email: string }) => entry.email === normalizedEmail)) return false;
+    const newUser = { id: crypto.randomUUID(), fullName: fullName.trim(), email: normalizedEmail, password, role };
+    users.push(newUser);
+    localStorage.setItem('sentinelcore-users', JSON.stringify(users));
+    persistUser({ id: newUser.id, fullName: newUser.fullName, email: newUser.email, role: 'Viewer' as const }, 'user');
+    return true;
   };
 
   const logout = () => persistUser(null);
 
-  const value = useMemo(() => ({ user, login, signup, logout }), [user]);
+  const value = useMemo(() => ({ user, authMode, login, signup, logout }), [authMode, user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

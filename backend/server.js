@@ -31,6 +31,49 @@ const writeData = (filename, data) => {
   fs.writeFileSync(filePath, JSON.stringify(data, null, 2));
 };
 
+// ============ AUTH ============
+const adminCredential = {
+  email: 'bhanu@gmail.com',
+  password: 'Bhanu@',
+};
+
+const userStore = [];
+
+const createToken = (mode, user) => `${mode}-${user.email}-${Date.now()}`;
+
+app.post('/api/auth/admin/login', (req, res) => {
+  const { email, password } = req.body || {};
+  if (email === adminCredential.email && password === adminCredential.password) {
+    const user = { id: 'admin-1', fullName: 'Admin User', email, role: 'Security Admin' };
+    return res.json({ user, token: createToken('admin', user) });
+  }
+  return res.status(401).json({ message: 'Invalid Admin Credentials.' });
+});
+
+app.post('/api/auth/user/signup', (req, res) => {
+  const { fullName, email, password } = req.body || {};
+  if (!fullName || !email || !password) {
+    return res.status(400).json({ message: 'All fields are required.' });
+  }
+  const normalizedEmail = String(email).trim().toLowerCase();
+  if (userStore.some((entry) => entry.email === normalizedEmail)) {
+    return res.status(409).json({ message: 'An account with that email already exists.' });
+  }
+  const user = { id: `user-${Date.now()}`, fullName: String(fullName).trim(), email: normalizedEmail, password: String(password) };
+  userStore.push(user);
+  return res.status(201).json({ user: { ...user, password: undefined }, token: createToken('user', user) });
+});
+
+app.post('/api/auth/user/login', (req, res) => {
+  const { email, password } = req.body || {};
+  const normalizedEmail = String(email || '').trim().toLowerCase();
+  const user = userStore.find((entry) => entry.email === normalizedEmail && entry.password === String(password || ''));
+  if (!user) {
+    return res.status(401).json({ message: 'Invalid email or password.' });
+  }
+  return res.json({ user: { ...user, password: undefined }, token: createToken('user', user) });
+});
+
 // ============ ASSETS ============
 app.get('/api/assets', (req, res) => {
   const assets = readData('assets');

@@ -1,11 +1,11 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from './AuthContext';
+import { readSession } from '../utils/authUtils';
 
 export default function ProtectedRoute() {
-  const { user } = useAuth();
   const location = useLocation();
+  const session = readSession();
 
-  if (!user) {
+  if (!session) {
     return <Navigate to="/login" replace state={{ from: location }} />;
   }
 

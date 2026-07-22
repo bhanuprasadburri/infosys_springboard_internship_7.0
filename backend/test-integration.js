@@ -86,6 +86,30 @@ async function runTests() {
     assert(res.data.status === 'ok', 'Health check response');
   });
 
+  // Auth flows
+  console.log('\nAuth:' );
+  await test('POST /api/auth/admin/login', async () => {
+    const res = await makeRequest('POST', '/auth/admin/login', { email: 'bhanu@gmail.com', password: 'Bhanu@' });
+    assertEqual(res.status, 200, 'Admin login status');
+    assert(res.data.user.email === 'bhanu@gmail.com', 'Admin response should include the admin email');
+    assert(res.data.token, 'Admin response should include a token');
+  });
+
+  await test('POST /api/auth/user/signup', async () => {
+    const newUser = { fullName: 'Test User', email: 'test.user@example.com', password: 'Test@1234' };
+    const res = await makeRequest('POST', '/auth/user/signup', newUser);
+    assertEqual(res.status, 201, 'User signup status');
+    assert(res.data.user.email === newUser.email, 'Signup response should include the created email');
+    assert(res.data.token, 'Signup response should include a token');
+  });
+
+  await test('POST /api/auth/user/login', async () => {
+    const res = await makeRequest('POST', '/auth/user/login', { email: 'test.user@example.com', password: 'Test@1234' });
+    assertEqual(res.status, 200, 'User login status');
+    assert(res.data.user.email === 'test.user@example.com', 'Login response should include the registered email');
+    assert(res.data.token, 'Login response should include a token');
+  });
+
   // Assets
   console.log('\nAssets:');
   await test('GET /api/assets', async () => {
