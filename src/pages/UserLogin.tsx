@@ -41,7 +41,7 @@ export default function UserLogin() {
     setLoading(false);
 
     createSession({ id: user.id, fullName: user.fullName, email: user.email, role: 'Viewer' }, 'user-token', 'user');
-    navigate('/user/dashboard', { replace: true });
+    navigate('/dashboard', { replace: true });
   };
 
   return (

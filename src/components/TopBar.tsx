@@ -14,7 +14,8 @@ export default function TopBar() {
 
   const handleLogout = () => {
     logout();
-    navigate('/login');
+    const session = localStorage.getItem('sentinelcore-auth-mode');
+    navigate(session === 'admin' ? '/admin/login' : '/user/login');
   };
 
   return (

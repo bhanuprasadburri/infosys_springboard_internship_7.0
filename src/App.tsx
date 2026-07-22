@@ -10,15 +10,11 @@ import Vulnerabilities from './pages/Vulnerabilities';
 import Audit from './pages/Audit';
 import Compliance from './pages/Compliance';
 import DevSecOps from './pages/DevSecOps';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
 import ForgotPassword from './pages/ForgotPassword';
 import AuthChoice from './pages/AuthChoice';
 import AdminLogin from './pages/AdminLogin';
-import AdminDashboard from './pages/AdminDashboard';
 import UserLogin from './pages/UserLogin';
 import UserSignUp from './pages/UserSignUp';
-import UserDashboard from './pages/UserDashboard';
 import NotFound from './pages/NotFound';
 
 const theme = createTheme({
@@ -42,15 +38,13 @@ function App() {
         <AppStateProvider>
           <BrowserRouter>
             <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<SignUp />} />
+              <Route path="/login" element={<AuthChoice />} />
+              <Route path="/signup" element={<UserSignUp />} />
               <Route path="/auth/choice" element={<AuthChoice />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
               <Route path="/user/login" element={<UserLogin />} />
               <Route path="/user/signup" element={<UserSignUp />} />
-              <Route path="/user/dashboard" element={<UserDashboard />} />
               <Route element={<ProtectedRoute />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/" element={<Dashboard />} />

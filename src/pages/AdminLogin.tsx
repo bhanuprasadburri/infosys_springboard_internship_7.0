@@ -49,7 +49,7 @@ export default function AdminLogin() {
     };
 
     createSession(adminUser, 'admin-token', 'admin');
-    navigate('/admin/dashboard', { replace: true });
+    navigate('/dashboard', { replace: true });
   };
 
   return (

@@ -64,7 +64,7 @@ export default function UserSignUp() {
     localStorage.setItem('sentinelcore-users', JSON.stringify(users));
     createSession({ id: newUser.id, fullName: cleanFullName, email: cleanEmail, role: 'Viewer' }, 'user-token', 'user');
     setSuccess('Account created successfully.');
-    navigate('/user/dashboard', { replace: true });
+    navigate('/dashboard', { replace: true });
   };
 
   return (
