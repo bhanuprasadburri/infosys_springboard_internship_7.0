@@ -278,5 +278,5 @@ DEALINGS IN THE SOFTWARE.
 Computer Science Engineering Student
 
 - GitHub: https://github.com/bhanuprasadburri
-- LinkedIn: https://www.linkedin.com/in/yourprofile
+- LinkedIn: https://www.linkedin.com/in/bhanu-prasad-burri/
 - Email: bhanuburri28@gmail.com
