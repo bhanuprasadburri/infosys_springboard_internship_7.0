@@ -36,266 +36,209 @@ The project now includes a lightweight Node.js + Express backend in `/server` th
    cd server
    npm install
    ```
-2. Create a `.env` file in `/server` based on `.env.example`.
-3. Create the MySQL database and table:
-   ```bash
-   mysql -u root < server/schema.sql
-   ```
-   If your XAMPP root user has a password, add `-p` and enter it when prompted.
-4. Start the backend server:
-   ```bash
-   cd server
-   npm run dev
-   ```
+# SentinelCore SecureOps — Enterprise Security Operations Platform
 
-### Frontend setup
-The frontend now calls `/api/auth/signup` and `/api/auth/login` for user auth. The frontend still lives in the root project folder and can be started separately:
-```bash
-npm install
-npm run dev
-```
-
-### Environment variables
-Use `/server/.env.example` to configure the backend.
-
-- `DB_HOST` — MySQL host
-- `DB_USER` — MySQL user
-- `DB_PASSWORD` — MySQL password
-- `DB_NAME` — MySQL database name
-- `DB_PORT` — MySQL port
-- `JWT_SECRET` — JWT signing secret
-- `FRONTEND_URL` — frontend origin allowed by CORS
-- `PORT` — backend port
+A compact security operations dashboard demonstrating role-aware authentication and a MySQL-backed user flow alongside a rich React UI for monitoring assets, incidents, vulnerabilities, and audit workflows.
 
 ## Overview
 
-SentinelCore SecureOps is a React + TypeScript application that simulates a security operations center experience for teams managing infrastructure health, incident response, vulnerability remediation, and audit readiness. It is designed for security analysts, administrators, and operations stakeholders who need a polished interface for tracking live risk signals and workflow actions.
+SentinelCore SecureOps provides a polished frontend experience for security operations use-cases (asset health, alerts, incidents, vulnerabilities, and audit traces). It is intended as a demo/portfolio project: user accounts are persisted in a local MySQL database through a lightweight Node.js/Express backend; other domain data shown in the UI is provided by mock fixtures and frontend state.
 
-The project combines a responsive frontend with a lightweight backend API layer for persistence and testing. Its goal is to provide a practical, recruiter-friendly demonstration of secure dashboard design, role-aware interactions, and operational workflow management.
+## Implemented Features
 
-## Features
+The list below reflects what is implemented in the repository today.
 
-### Authentication
+- Authentication
+  - Admin login (frontend-only, hardcoded credential check)
+  - User Sign Up (persists to MySQL)
+  - User Login (verifies credentials, issues JWT)
+  - `GET /api/auth/me` — token verification
+  - Session persistence in browser storage
 
-- Separate admin and user authentication experiences
-- Protected routes for authenticated access
-- Session persistence through browser storage
-- User signup flow with password validation and duplicate email checks
-- Admin login with designated credentials
+- Frontend UI (mock-backed/persistent mix)
+  - Asset list and detail views
+  - Alerts feed and stat cards
+  - Incident list, creation and status workflows (UI-driven)
+  - Vulnerability list and detail views
+  - Audit log viewer and export UI (mock data)
+  - Charts and metrics using Recharts
 
-### User Features
-
-- Dashboard with health metrics, alert summaries, and asset overview cards
-- Asset inventory with search, filtering, sorting, and pagination
-- Incident tracking with assignment, investigation, note-taking, and resolution workflows
-- Vulnerability management with CVE-based views, filtering, patch actions, and risk reporting
-- Audit log review with searchable, filterable timeline entries
-- Compliance reporting and security report generation
-- DevSecOps review workflow with compliance check execution
-
-### Admin Features
-
-- Role-aware permission handling for patching, assigning, exporting, reviewing, and closing actions
-- Incident escalation workflows from the dashboard
-- Compliance export actions and audit logging
-
-### UI/UX
-
-- Dark-themed modern interface using Material UI
-- Responsive layout for desktop and tablet usage
-- Reusable dashboard components such as stat cards, sidebars, tables, and drawers
-- Toast feedback and modal-based workflows for actions
-
-### Security & Operational Flow
-
-- Permission-based action restriction for different roles
-- Audit trail logging for critical operations
-- Risk and compliance status visualization
+Note: Except for authentication, most domain data relies on frontend mock data and the app will fall back to those mocks if API endpoints are not available.
 
 ## Tech Stack
 
-| Category | Technologies |
-| --- | --- |
-| Frontend | React, TypeScript, Vite |
-| UI Library | Material UI, Emotion |
-| Routing | React Router DOM |
-| Charts / Visualization | Recharts |
-| Backend | Node.js, Express |
-| Data Storage | MySQL for user authentication and API persistence |
-| Authentication | JWT-backed auth for users, local admin login for frontend-only admin access |
-| Build Tools | TypeScript Compiler, Vite |
-| Package Management | npm |
+| Layer      | Technology |
+|------------|------------|
+| Frontend   | React, TypeScript, Vite, Material UI (@mui), Emotion, Recharts |
+| Backend    | Node.js, Express, JWT (jsonwebtoken), bcrypt, mysql2 |
+| Database   | MySQL (tested with XAMPP/local MySQL) |
+| State      | React Context API (AuthProvider, AppStateContext) |
 
-## Project Architecture
+(Dependencies verified in `package.json` and `server/package.json`.)
 
-The application follows a modular single-page application architecture:
+## Repository Structure (key files)
 
-- The frontend is rendered through React components organized by feature and page.
-- Global application state is managed in the app state context and shared across dashboard modules.
-- Authentication is handled through a dedicated context provider with route protection.
-- The UI interacts with a lightweight API client that communicates with the Express backend when available.
-- If the backend is unavailable, the app falls back to mock data for local development and demonstration.
-
-### Authentication Flow
-
-1. A user selects either admin or user access.
-2. Credentials are validated locally in the app flow.
-3. A session is created and stored in browser storage.
-4. Protected routes redirect unauthenticated users to the login experience.
-
-## Folder Structure
-
-```text
-sentinelcore-secureops/
-├── server/
+```
+.
+├── index.html
+├── package.json           # frontend scripts & dependencies
+├── vite.config.js
+├── README.md
+├── .env.local             # frontend env (VITE_API_URL)
+├── server/                # backend
+│   ├── server.js
 │   ├── db.js
 │   ├── package.json
-│   ├── schema.sql
-│   ├── server.js
-│   └── .env.example
-├── public/
-├── src/
-│   ├── api/
-│   ├── assets/
-│   ├── auth/
-│   ├── components/
-│   ├── context/
-│   ├── data/
-│   ├── pages/
-│   ├── types/
-│   └── utils/
-├── .env.local
-├── package.json
-├── README.md
-└── vite.config.js
+│   └── schema.sql
+└── src/                   # frontend source
+    ├── api/
+    │   └── client.ts
+    ├── auth/
+    │   ├── AuthContext.tsx
+    │   └── ProtectedRoute.tsx
+    ├── components/
+    ├── context/
+    │   └── AppStateContext.tsx
+    ├── data/
+    │   └── mockAssets.ts
+    ├── pages/
+    │   ├── Login.tsx
+    │   ├── SignUp.tsx
+    │   ├── AdminLogin.tsx
+    │   └── Dashboard.tsx
+    └── utils/
+        └── authUtils.ts
 ```
 
-## Installation
+## Prerequisites
 
-### 1. Clone the repository
+- Node.js (LTS recommended — tested with Node 18+)
+- npm
+- MySQL server (XAMPP or equivalent) running on `localhost:3306`
+
+## Setup & Installation
+
+1. Clone the repository and install frontend deps:
 
 ```bash
-git clone <repository-url>
-cd sentinelcore-secureops
-```
-
-### 2. Install frontend dependencies
-
-```bash
+git clone <repo-url>
+cd infosys_springboard_internship_7.0
 npm install
 ```
 
-### 3. Install backend dependencies
+2. Install backend deps:
 
 ```bash
 cd server
 npm install
+cd ..
 ```
 
-## Running the Project
+3. Configure backend environment (create `server/.env` from `server/.env.example`) and set your DB credentials.
 
-### Start the backend
+4. Create the database schema (CLI or phpMyAdmin):
 
-From the server folder:
+```bash
+# Using mysql CLI
+mysql -u root < server/schema.sql
+# or with password
+mysql -u root -p < server/schema.sql
+```
+
+5. Start backend (separate terminal):
 
 ```bash
 cd server
 npm run dev
 ```
 
-This starts the Express API server for asset, incident, vulnerability, audit, and health endpoints.
-
-### Start the frontend
-
-From the project root:
+6. Start frontend (new terminal):
 
 ```bash
+cd ..
 npm run dev
 ```
 
-The frontend will be available at:
-
-```text
-http://localhost:5173
-```
-
-The backend API will typically be served at:
-
-```text
-http://localhost:3001/api
-```
-
-## Available Commands
-
-### Root project
-
-- `npm install` — install frontend dependencies
-- `npm run dev` — launch the Vite development server
-- `npm run build` — create a production build
-- `npm run preview` — preview the production build locally
-
-### Backend
-
-- `cd server && npm run dev` — start the backend in watch mode
-- `cd server && npm run start` — start the backend server
+Frontend: http://localhost:5173
+Backend API: http://localhost:3001/api
 
 ## Environment Variables
 
-The frontend currently uses one environment variable:
+Create `server/.env` (do not commit). Keys used by the server:
 
-| Variable | Description |
-| --- | --- |
-| VITE_API_URL | Base URL for the backend API. Default is http://localhost:3001/api |
+- `DB_HOST`
+- `DB_PORT`
+- `DB_USER`
+- `DB_PASSWORD`
+- `DB_NAME`
+- `JWT_SECRET`
+- `FRONTEND_URL`
+- `PORT`
 
-The server backend uses the `.env` variables defined in `/server/.env.example`.
+Frontend uses:
+- `VITE_API_URL` (defined in `.env.local` or environment)
 
-A sample frontend value is already defined in the local environment file:
+## Authentication Notes
 
-```env
-VITE_API_URL=http://localhost:3001/api
+- Admin login is a frontend-only hardcoded credential (for demo use).
+- User registration persists to the `users` table in MySQL; passwords are hashed with `bcrypt` before storage.
+- User login returns a JWT that the frontend uses for authenticated requests and session persistence.
+
+## API Endpoints (implemented)
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET    | /api/health | Health check |
+| POST   | /api/auth/signup | Register a new user (MySQL) |
+| POST   | /api/auth/login | Authenticate user, return JWT |
+| GET    | /api/auth/me | Validate token and return user payload |
+
+## NPM Scripts
+
+Frontend (`package.json`):
+- `dev` — start Vite dev server
+- `build` — TypeScript check and build
+- `preview` — preview production build
+
+Backend (`server/package.json`):
+- `dev` — start server (`node server.js`)
+- `start` — start server
+
+## Known Limitations
+
+- Admin credentials are hardcoded and not secure for production.
+- Domain data (assets, incidents, vulnerabilities, audit logs) are primarily mock-backed; persistent CRUD beyond auth is not implemented.
+- Dependency audit warnings may exist; run `npm audit` to inspect and optionally update packages.
+
+## Quick Smoke Tests
+
+Health check:
+
+```bash
+curl http://localhost:3001/api/health
+# -> { "status": "ok" }
 ```
 
-## Usage
+Signup / Login (PowerShell example):
 
-1. Open the app and choose between admin and user access.
-2. Sign in with the appropriate credentials or create a user account.
-3. Navigate through the dashboard to inspect assets, incidents, vulnerabilities, and audit history.
-4. Use available actions such as reviewing assets, escalating incidents, patching vulnerabilities, and exporting compliance reports.
-5. Review the audit trail and compliance pages to monitor operational status.
+```powershell
+$signup = @{ fullName='Demo User'; email='demo+local@example.com'; password='Aa1!testuser' } | ConvertTo-Json
+Invoke-RestMethod -Uri "http://localhost:3001/api/auth/signup" -Method Post -ContentType 'application/json' -Body $signup
 
-## Screenshots
+$login = @{ email='demo+local@example.com'; password='Aa1!testuser' } | ConvertTo-Json
+$l = Invoke-RestMethod -Uri "http://localhost:3001/api/auth/login" -Method Post -ContentType 'application/json' -Body $login
 
-Placeholder images for future documentation:
-
-```text
-docs/images/home.png
-docs/images/login.png
-docs/images/dashboard.png
-docs/images/incidents.png
-docs/images/compliance.png
+$headers = @{ Authorization = "Bearer $($l.token)" }
+Invoke-RestMethod -Uri "http://localhost:3001/api/auth/me" -Method Get -Headers $headers
 ```
-
-## Future Enhancements
-
-Potential improvements for future releases include:
-
-- Real backend authentication with secure token-based sessions
-- Persistent database integration instead of local JSON files
-- Role-based access control backed by a real authorization service
-- Advanced charts and analytics for SOC reporting
-- Notification center and email/SMS alert integration
-- CI/CD workflow and automated testing for frontend and backend
-
-## Contributing
-
-Contributions are welcome.
-
-1. Fork the repository.
-2. Create a feature branch.
-3. Make your changes and test them locally.
-4. Submit a pull request with a clear summary of the improvement.
 
 ## License
+
+License: Not yet specified
+
+---
+
+If you want, I can add a short CONTRIBUTING section, a developer quickstart, or commit this README update for you. Let me know which option you prefer.
 
 This project is licensed under the MIT License.
 
