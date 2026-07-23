@@ -70,7 +70,7 @@ export default function Compliance() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#050b13', color: '#f5f7fa' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.secondary', color: 'text.primary' }}>
       <TopBar />
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
         <Sidebar />
@@ -80,8 +80,8 @@ export default function Compliance() {
             <StatCard title="Compliance" value={`${compliancePercent}%`} subtitle="Frameworks aligned" />
             <StatCard title="Violations" value={reportSummary.criticalCves.toString()} subtitle="Unpatched critical CVEs" />
           </Box>
-          <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3, mb: 2 }}>
-            <Typography variant="h6" sx={{ mb: 1.5 }}>Framework Checklist</Typography>
+          <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3, mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1.5, color: 'text.primary', fontWeight: 700 }}>Framework Checklist</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
               {complianceChecklist.map((item) => (
                 <Chip
@@ -92,23 +92,23 @@ export default function Compliance() {
               ))}
             </Stack>
           </Paper>
-          <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3, mb: 2 }}>
-            <Typography variant="h6" sx={{ mb: 1.5 }}>Report Generation</Typography>
+          <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3, mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1.5, color: 'text.primary', fontWeight: 700 }}>Report Generation</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5}>
               <Button variant="outlined" onClick={() => setReportDrawer('Access Report')} disabled={!canView}>Access Report</Button>
               <Button variant="outlined" onClick={() => setReportDrawer('Security Report')} disabled={!canView}>Security Report</Button>
-              <Button variant="contained" sx={{ bgcolor: '#c62828', '&:hover': { bgcolor: '#8b1e1e' } }} onClick={(event) => setMenuAnchor(event.currentTarget)} disabled={exporting || !canExport}>
+              <Button variant="contained" onClick={(event) => setMenuAnchor(event.currentTarget)} disabled={exporting || !canExport}>
                 {exporting ? <CircularProgress size={16} sx={{ mr: 1 }} /> : null}
                 Export Report
               </Button>
             </Stack>
           </Paper>
           {history.length > 0 && (
-            <Paper elevation={0} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3, mb: 2 }}>
+            <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3, mb: 2 }}>
               <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Export History</Typography>
               <Stack spacing={1}>
                 {history.map((entry) => (
-                  <Box key={entry.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1, bgcolor: 'rgba(255,255,255,0.02)', borderRadius: 2 }}>
+                  <Box key={entry.id} sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 1, bgcolor: 'grey.50', borderRadius: 2 }}>
                     <Stack spacing={0.25}>
                       <Typography variant="body2">{entry.name}</Typography>
                       <Typography variant="caption" color="text.secondary">{entry.timestamp} • {entry.format}</Typography>
@@ -127,7 +127,7 @@ export default function Compliance() {
               <Typography variant="h6">{reportDrawer}</Typography>
               {reportDrawer === 'Access Report' ? (
                 <>
-                  <Paper elevation={0} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2 }}>
+                  <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
                     <Stack spacing={1}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Typography variant="body2" color="text.secondary">Total logins:</Typography>
@@ -159,7 +159,7 @@ export default function Compliance() {
                 </>
               ) : (
                 <>
-                  <Paper elevation={0} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.04)', borderRadius: 2 }}>
+                  <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
                     <Stack spacing={1}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                         <Typography variant="body2" color="text.secondary">Open incidents:</Typography>

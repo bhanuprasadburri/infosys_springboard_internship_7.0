@@ -20,6 +20,53 @@ A modern, dark-mode security operations dashboard for monitoring assets, inciden
 - [License](#license)
 - [Author](#author)
 
+## Backend Setup
+
+The project now includes a lightweight Node.js + Express backend in `/server` that persists user accounts in MySQL for the user signup/login flow. Admin login remains frontend-only and unchanged.
+
+### Server files
+- `/server/server.js` — Express app and auth routes
+- `/server/db.js` — MySQL connection pool
+- `/server/schema.sql` — database/table creation script
+- `/server/.env.example` — environment variable template
+
+### Install and run
+1. Install the backend dependencies:
+   ```bash
+   cd server
+   npm install
+   ```
+2. Create a `.env` file in `/server` based on `.env.example`.
+3. Create the MySQL database and table:
+   ```bash
+   mysql -u root < server/schema.sql
+   ```
+   If your XAMPP root user has a password, add `-p` and enter it when prompted.
+4. Start the backend server:
+   ```bash
+   cd server
+   npm run dev
+   ```
+
+### Frontend setup
+The frontend now calls `/api/auth/signup` and `/api/auth/login` for user auth. The frontend still lives in the root project folder and can be started separately:
+```bash
+npm install
+npm run dev
+```
+
+### Environment variables
+Use `/server/.env.example` to configure the backend.
+
+- `DB_HOST` — MySQL host
+- `DB_USER` — MySQL user
+- `DB_PASSWORD` — MySQL password
+- `DB_NAME` — MySQL database name
+- `DB_PORT` — MySQL port
+- `JWT_SECRET` — JWT signing secret
+- `FRONTEND_URL` — frontend origin allowed by CORS
+- `PORT` — backend port
+
 ## Overview
 
 SentinelCore SecureOps is a React + TypeScript application that simulates a security operations center experience for teams managing infrastructure health, incident response, vulnerability remediation, and audit readiness. It is designed for security analysts, administrators, and operations stakeholders who need a polished interface for tracking live risk signals and workflow actions.
@@ -74,8 +121,8 @@ The project combines a responsive frontend with a lightweight backend API layer 
 | Routing | React Router DOM |
 | Charts / Visualization | Recharts |
 | Backend | Node.js, Express |
-| Data Storage | JSON-based local data files and API persistence |
-| Authentication | Custom session-based auth flow with local storage |
+| Data Storage | MySQL for user authentication and API persistence |
+| Authentication | JWT-backed auth for users, local admin login for frontend-only admin access |
 | Build Tools | TypeScript Compiler, Vite |
 | Package Management | npm |
 
@@ -100,11 +147,12 @@ The application follows a modular single-page application architecture:
 
 ```text
 sentinelcore-secureops/
-├── backend/
-│   ├── data/
-│   ├── seed.js
+├── server/
+│   ├── db.js
+│   ├── package.json
+│   ├── schema.sql
 │   ├── server.js
-│   └── test-integration.js
+│   └── .env.example
 ├── public/
 ├── src/
 │   ├── api/
@@ -140,7 +188,7 @@ npm install
 ### 3. Install backend dependencies
 
 ```bash
-cd backend
+cd server
 npm install
 ```
 
@@ -148,10 +196,10 @@ npm install
 
 ### Start the backend
 
-From the backend folder:
+From the server folder:
 
 ```bash
-cd backend
+cd server
 npm run dev
 ```
 
@@ -188,20 +236,20 @@ http://localhost:3001/api
 
 ### Backend
 
-- `cd backend && npm run dev` — start the backend in watch mode
-- `cd backend && npm run start` — start the backend server
-- `cd backend && npm run seed` — seed backend JSON data
-- `cd backend && npm test` — run backend integration tests
+- `cd server && npm run dev` — start the backend in watch mode
+- `cd server && npm run start` — start the backend server
 
 ## Environment Variables
 
-The project currently uses one frontend environment variable:
+The frontend currently uses one environment variable:
 
 | Variable | Description |
 | --- | --- |
 | VITE_API_URL | Base URL for the backend API. Default is http://localhost:3001/api |
 
-A sample value is already defined in the local environment file:
+The server backend uses the `.env` variables defined in `/server/.env.example`.
+
+A sample frontend value is already defined in the local environment file:
 
 ```env
 VITE_API_URL=http://localhost:3001/api

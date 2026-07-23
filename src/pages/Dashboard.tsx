@@ -158,12 +158,12 @@ export default function Dashboard() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#050b13', color: '#f5f7fa' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.secondary', color: 'text.primary' }}>
       <TopBar />
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
         <Sidebar />
         <Box component="main" sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
-          <Typography variant="h4" sx={{ color: '#f5f7fa', fontWeight: 700, mb: 2 }}>
+          <Typography variant="h4" sx={{ color: 'text.primary', fontWeight: 700, mb: 2 }}>
             Servers, Cloud, Network Health
           </Typography>
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(3, minmax(0, 1fr))' }, gap: 2, mb: 3 }}>
@@ -172,12 +172,12 @@ export default function Dashboard() {
             <StatCard title="Alerts" value={summary.alerts.toString()} subtitle="Active" />
           </Box>
 
-          <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 4, mb: 2 }}>
+          <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 4, mb: 2 }}>
             <Typography variant="h6" sx={{ mb: 2 }}>
               Asset Service - Infrastructure Health
             </Typography>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, minmax(0, 1fr))' }, gap: 2 }}>
-              <Paper elevation={0} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
+              <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1.5 }}>Server Breakdown</Typography>
                 <Stack spacing={1}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography color="text.secondary">Total</Typography><Typography>1,247</Typography></Box>
@@ -186,7 +186,7 @@ export default function Dashboard() {
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography color="text.secondary">Critical</Typography><Typography color="error.main">2</Typography></Box>
                 </Stack>
               </Paper>
-              <Paper elevation={0} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
+              <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1.5 }}>Cloud Breakdown</Typography>
                 <Stack spacing={1}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between' }}><Typography color="text.secondary">AWS</Typography><Typography>847</Typography></Box>
@@ -197,7 +197,7 @@ export default function Dashboard() {
               </Paper>
             </Box>
             <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, minmax(0, 1fr))' }, gap: 2, mt: 2 }}>
-              <Paper elevation={0} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
+              <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1.5 }}>Resource Averages</Typography>
                 <Stack spacing={1.4}>
                   {metrics.map((metric) => (
@@ -206,14 +206,14 @@ export default function Dashboard() {
                         <Typography variant="body2">{metric.label}</Typography>
                         <Typography variant="body2" color="text.secondary">{metric.value}{metric.unit}</Typography>
                       </Box>
-                      <Box sx={{ height: 8, borderRadius: 999, bgcolor: 'rgba(255,255,255,0.1)' }}>
+                      <Box sx={{ height: 8, borderRadius: 999, bgcolor: 'grey.100' }}>
                         <Box sx={{ height: '100%', width: `${metric.value}%`, bgcolor: metric.value >= 80 ? '#d32f2f' : metric.value >= 60 ? '#ed6c02' : '#2e7d32', borderRadius: 999 }} />
                       </Box>
                     </Box>
                   ))}
                 </Stack>
               </Paper>
-              <Paper elevation={0} sx={{ p: 2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
+              <Paper elevation={0} sx={{ p: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
                 <Typography variant="subtitle1" sx={{ mb: 1.5 }}>Health Summary</Typography>
                 <Typography variant="body2" color="text.secondary">Uptime: 99.99% • Outages: 0 • Status: Within SLA</Typography>
                 <Stack spacing={1.2} sx={{ mt: 1.5 }}>
@@ -227,18 +227,18 @@ export default function Dashboard() {
               </Paper>
             </Box>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 2 }}>
-              <Button variant="contained" sx={{ bgcolor: '#c62828', '&:hover': { bgcolor: '#8b1e1e' } }} onClick={handleViewAssets}>View Assets</Button>
+              <Button variant="contained" color="error" onClick={handleViewAssets}>View Assets</Button>
               <Button variant="outlined" color="warning" onClick={() => handleScaleClick(assets.find((asset) => asset.status !== 'healthy') ?? assets[0])} disabled={!canScale}>Scale</Button>
               <Button variant="outlined" color="info" onClick={() => handleInvestigate(assets.find((asset) => asset.status !== 'healthy') ?? assets[0])} disabled={!canInvestigate}>Investigate</Button>
             </Stack>
           </Paper>
 
           <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: '2fr 1fr' }, gap: 2 }}>
-            <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
-              <Typography variant="h6" sx={{ color: '#f5f7fa', mb: 1.5 }}>Asset Inventory</Typography>
+            <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+              <Typography variant="h6" sx={{ color: 'text.primary', mb: 1.5 }}>Asset Inventory</Typography>
               <Stack spacing={1.2}>
                 {assets.map((asset) => (
-                  <Box key={asset.id} sx={{ p: 1.2, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.03)' }}>
+                  <Box key={asset.id} sx={{ p: 1.2, borderRadius: 2, bgcolor: 'grey.50', border: '1px solid', borderColor: 'divider' }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <Box>
                         <Typography variant="body2">{asset.name}</Typography>

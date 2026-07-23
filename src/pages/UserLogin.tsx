@@ -1,8 +1,9 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Alert, Box, Button, Checkbox, CircularProgress, FormControlLabel, IconButton, InputAdornment, Link, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, Checkbox, CircularProgress, FormControlLabel, IconButton, InputAdornment, Link, Paper, Snackbar, Stack, TextField, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { createSession, isValidEmail, sanitizeInput } from '../utils/authUtils';
+import { useAuth } from '../auth/AuthContext';
+import { isValidEmail, sanitizeInput } from '../utils/authUtils';
 
 export default function UserLogin() {
   const [email, setEmail] = useState('');
@@ -11,7 +12,9 @@ export default function UserLogin() {
   const [rememberMe, setRememberMe] = useState(true);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ open: false, message: '' });
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const canSubmit = useMemo(() => email.trim().length > 0 && password.length > 0, [email, password]);
 
@@ -27,29 +30,26 @@ export default function UserLogin() {
       return;
     }
 
-    const storedUsers = localStorage.getItem('sentinelcore-users');
-    const users = storedUsers ? JSON.parse(storedUsers) : [];
-    const user = users.find((entry: { email: string; password: string }) => entry.email === cleanEmail && entry.password === cleanPassword);
+    setLoading(true);
+    const success = await login(cleanEmail, cleanPassword, rememberMe);
+    setLoading(false);
 
-    if (!user) {
+    if (!success) {
       setError('Invalid email or password.');
+      setToast({ open: true, message: 'Invalid email or password.' });
       return;
     }
 
-    setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 700));
-    setLoading(false);
-
-    createSession({ id: user.id, fullName: user.fullName, email: user.email, role: 'Viewer' }, 'user-token', 'user');
+    setToast({ open: true, message: 'Welcome back.' });
     navigate('/dashboard', { replace: true });
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'radial-gradient(circle at top, #172554 0%, #050b13 60%)', p: { xs: 2, md: 4 } }}>
-      <Paper elevation={0} sx={{ width: '100%', maxWidth: 460, p: { xs: 3, md: 4 }, borderRadius: 4, bgcolor: 'rgba(15, 23, 34, 0.86)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)', boxShadow: '0 20px 45px rgba(0,0,0,0.3)' }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.secondary', p: { xs: 2, md: 4 } }}>
+      <Paper elevation={0} sx={{ width: '100%', maxWidth: 460, p: { xs: 3, md: 4 }, borderRadius: 4, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: '0 16px 40px rgba(15,23,42,0.08)' }}>
         <Stack spacing={2.5}>
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: '#f5f7fa' }}>User Login</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>User Login</Typography>
             <Typography variant="body2" color="text.secondary">Access your security operations workspace.</Typography>
           </Box>
 
@@ -62,7 +62,7 @@ export default function UserLogin() {
                 <Link component={RouterLink} to="/forgot-password" underline="hover">Forgot password?</Link>
               </Box>
               {error ? <Alert severity="error" sx={{ borderRadius: 2 }}>{error}</Alert> : null}
-              <Button type="submit" variant="contained" disabled={!canSubmit || loading} sx={{ py: 1.2, fontWeight: 700, bgcolor: '#2563eb', '&:hover': { bgcolor: '#1d4ed8' } }}>
+              <Button type="submit" variant="contained" disabled={!canSubmit || loading} sx={{ py: 1.2, fontWeight: 700 }}>
                 {loading ? <CircularProgress size={22} color="inherit" /> : 'Sign In'}
               </Button>
             </Stack>
@@ -73,6 +73,7 @@ export default function UserLogin() {
           </Typography>
         </Stack>
       </Paper>
+      <Snackbar open={toast.open} autoHideDuration={2500} onClose={() => setToast({ open: false, message: '' })} message={toast.message} />
     </Box>
   );
 }

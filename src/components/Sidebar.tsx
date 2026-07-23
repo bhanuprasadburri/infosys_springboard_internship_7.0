@@ -14,11 +14,11 @@ const navItems = [
 export default function Sidebar() {
   const location = useLocation();
   return (
-    <Box sx={{ width: { xs: '100%', md: 260 }, bgcolor: '#07131d', minHeight: { md: '100vh' }, py: 2, borderRight: { md: '1px solid rgba(255,255,255,0.08)' } }}>
-      <Typography variant="overline" sx={{ px: 3, color: 'rgba(255,255,255,0.6)', display: 'block', mb: 2 }}>
+    <Box sx={{ width: { xs: '100%', md: 270 }, bgcolor: 'background.paper', minHeight: { md: '100vh' }, py: 2.5, borderRight: { md: '1px solid' }, borderColor: 'divider', position: { md: 'sticky' }, top: 0 }}>
+      <Typography variant="overline" sx={{ px: 3, color: 'text.secondary', display: 'block', mb: 2, fontWeight: 700, letterSpacing: '0.18em' }}>
         SecureOps
       </Typography>
-      <List disablePadding>
+      <List disablePadding sx={{ px: 1.5 }}>
         {navItems.map((item) => {
           const active = location.pathname === item.path;
           return (
@@ -27,7 +27,18 @@ export default function Sidebar() {
               component={Link}
               to={item.path}
               selected={active}
-              sx={{ mx: 1.5, mb: 0.75, borderRadius: 2, bgcolor: active ? 'rgba(220,38,38,0.18)' : 'transparent', color: active ? '#fff' : 'rgba(255,255,255,0.8)' }}
+              sx={{
+                mb: 0.75,
+                px: 1.75,
+                py: 1.1,
+                borderRadius: 1.75,
+                bgcolor: active ? 'primary.main' : 'transparent',
+                color: active ? 'common.white' : 'text.secondary',
+                fontWeight: active ? 700 : 500,
+                '& .MuiListItemText-primary': { fontSize: '0.95rem' },
+                '&:hover': { bgcolor: active ? 'primary.dark' : 'action.hover', color: active ? 'common.white' : 'text.primary' },
+                transition: 'all 200ms ease',
+              }}
             >
               <ListItemText primary={item.label} />
             </ListItemButton>

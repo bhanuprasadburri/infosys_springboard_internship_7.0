@@ -100,7 +100,7 @@ export default function Vulnerabilities() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#050b13', color: '#f5f7fa' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.secondary', color: 'text.primary' }}>
       <TopBar />
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
         <Sidebar />
@@ -111,7 +111,7 @@ export default function Vulnerabilities() {
             <StatCard title="Critical Patched" value={summary.criticalPatched.toString()} subtitle="This quarter" />
             <StatCard title="Risk Score" value={summary.riskScore} subtitle="Average" />
           </Box>
-          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
+          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
               <TextField label="Search CVE / asset" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} size="small" sx={{ minWidth: 200 }} />
               <TextField select label="Severity" value={severityFilter} onChange={(e) => { setSeverityFilter(e.target.value as 'all' | AlertSeverity); setPage(1); }} size="small" sx={{ minWidth: 160 }}>
@@ -147,14 +147,14 @@ export default function Vulnerabilities() {
             emptyText="No vulnerabilities match your filters"
             renderRow={(vulnerability) => (
               <>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{vulnerability.cveId}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Chip label={vulnerability.severity} color={vulnerability.severity === 'critical' ? 'error' : vulnerability.severity === 'high' ? 'warning' : 'success'} size="small" /></TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{vulnerability.cvss}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{vulnerability.affectedAssets}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{vulnerability.patchStatus}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{vulnerability.riskScore}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{vulnerability.lastScanSource}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Stack direction="row" spacing={1}>{vulnerability.patchStatus === 'patched' ? <Chip label="Patched ✓" color="success" size="small" /> : <Button size="small" variant="outlined" onClick={() => handlePatch(vulnerability)} disabled={!canPatch}>{patching && patchTarget?.id === vulnerability.id ? <CircularProgress size={14} sx={{ mr: 1 }} /> : null}Patch Now</Button>}<Button size="small" variant="outlined" onClick={() => openReport(vulnerability)} disabled={!canView}>Risk Report</Button></Stack></TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{vulnerability.cveId}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}><Chip label={vulnerability.severity} color={vulnerability.severity === 'critical' ? 'error' : vulnerability.severity === 'high' ? 'warning' : 'success'} size="small" /></TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{vulnerability.cvss}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{vulnerability.affectedAssets}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{vulnerability.patchStatus}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{vulnerability.riskScore}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{vulnerability.lastScanSource}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}><Stack direction="row" spacing={1}>{vulnerability.patchStatus === 'patched' ? <Chip label="Patched ✓" color="success" size="small" /> : <Button size="small" variant="outlined" onClick={() => handlePatch(vulnerability)} disabled={!canPatch}>{patching && patchTarget?.id === vulnerability.id ? <CircularProgress size={14} sx={{ mr: 1 }} /> : null}Patch Now</Button>}<Button size="small" variant="outlined" onClick={() => openReport(vulnerability)} disabled={!canView}>Risk Report</Button></Stack></TableCell>
               </>
             )}
             footer={

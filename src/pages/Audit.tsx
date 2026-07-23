@@ -57,7 +57,7 @@ export default function Audit() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#050b13', color: '#f5f7fa' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.secondary', color: 'text.primary' }}>
       <TopBar />
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
         <Sidebar />
@@ -68,7 +68,7 @@ export default function Audit() {
             <StatCard title="Critical Actions" value={summary.criticalActions.toString()} subtitle="Escalations/patches" />
             <StatCard title="Failed Attempts" value={summary.failedAttempts.toString()} subtitle="Security events" />
           </Box>
-          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
+          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
               <TextField label="Search log" value={searchTerm} onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }} size="small" sx={{ minWidth: 220 }} />
               <TextField select label="Action" value={actionFilter} onChange={(e) => { setActionFilter(e.target.value); setPage(1); }} size="small" sx={{ minWidth: 180 }}>
@@ -91,13 +91,13 @@ export default function Audit() {
             emptyText="No audit log entries match your filters"
             renderRow={(entry) => (
               <>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.id}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{entry.id}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>
                   <Chip label={entry.action} size="small" color={getActionChipColor(entry.action)} />
                 </TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.user}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.timestamp}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{entry.source}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{entry.user}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{entry.timestamp}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{entry.source}</TableCell>
               </>
             )}
             footer={

@@ -83,13 +83,13 @@ export default function Assets() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#050b13', color: '#f5f7fa' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.secondary', color: 'text.primary' }}>
       <TopBar />
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
         <Sidebar />
         <Box component="main" sx={{ flex: 1, p: { xs: 2, md: 3 } }}>
           <Typography variant="h4" sx={{ mb: 2, fontWeight: 700 }}>Asset Inventory</Typography>
-          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
+          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} alignItems="center">
               <TextField label="Search asset" value={search} onChange={(e) => { setSearch(e.target.value); setPage(1); }} size="small" sx={{ minWidth: 220 }} />
               <TextField select label="Status" value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} size="small" sx={{ minWidth: 140 }}>
@@ -122,16 +122,16 @@ export default function Assets() {
             rows={pagedAssets}
             renderRow={(asset) => (
               <>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{asset.id}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{asset.name}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{asset.type}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{asset.environment}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Chip label={asset.status} color={asset.status === 'critical' ? 'error' : asset.status === 'warning' ? 'warning' : 'success'} size="small" /></TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{asset.cpu}%</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{asset.memory}%</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{asset.disk}%</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{asset.lastChecked}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Stack direction="row" spacing={1}><Button size="small" variant="outlined" onClick={() => handleOpenAsset(asset)}>Details</Button><Button size="small" variant="contained" onClick={() => handleReviewAsset(asset)} disabled={!canReview}>Review</Button></Stack></TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{asset.id}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{asset.name}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{asset.type}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{asset.environment}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}><Chip label={asset.status} color={asset.status === 'critical' ? 'error' : asset.status === 'warning' ? 'warning' : 'success'} size="small" /></TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{asset.cpu}%</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{asset.memory}%</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{asset.disk}%</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{asset.lastChecked}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}><Stack direction="row" spacing={1}><Button size="small" variant="outlined" onClick={() => handleOpenAsset(asset)}>Details</Button><Button size="small" variant="contained" onClick={() => handleReviewAsset(asset)} disabled={!canReview}>Review</Button></Stack></TableCell>
               </>
             )}
             footer={

@@ -242,7 +242,7 @@ export default function Incidents() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#050b13', color: '#f5f7fa' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.secondary', color: 'text.primary' }}>
       <TopBar />
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
         <Sidebar />
@@ -253,13 +253,13 @@ export default function Incidents() {
             <StatCard title="MTTR" value={summary.mttr} subtitle="Mean resolution" />
             <StatCard title="Resolved" value={summary.resolved.toString()} subtitle="This month" />
           </Box>
-          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
-            <Typography variant="h6" sx={{ mb: 1.5 }}>Workflow Stages</Typography>
+          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
+            <Typography variant="h6" sx={{ mb: 1.5, color: 'text.primary', fontWeight: 700 }}>Workflow Stages</Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1}>
               {['Open', 'Assigned', 'Investigation', 'Resolved'].map((stage) => <Chip key={stage} label={stage} color={stage === 'Resolved' ? 'success' : stage === 'Investigation' ? 'warning' : stage === 'Assigned' ? 'info' : 'error'} />)}
             </Stack>
           </Paper>
-          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
+          <Paper elevation={0} sx={{ p: 2, mb: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
             <Stack direction={{ xs: 'column', md: 'row' }} spacing={2}>
               <TextField label="Search incidents" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} size="small" sx={{ minWidth: 220 }} />
               <TextField select label="Severity" value={severityFilter} onChange={(e) => setSeverityFilter(e.target.value)} size="small" sx={{ minWidth: 150 }}>
@@ -290,14 +290,14 @@ export default function Incidents() {
             emptyText="No incidents match your filters"
             renderRow={(incident) => (
               <>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{incident.id}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Chip label={incident.severity} color={incident.severity === 'critical' ? 'error' : incident.severity === 'high' ? 'warning' : 'success'} size="small" /></TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{incident.title}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{incident.sourceIp}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Chip label={incident.status} color={incident.status === 'Resolved' || incident.status === 'Closed' ? 'success' : incident.status === 'Assigned' ? 'warning' : incident.status === 'Investigation' ? 'info' : 'error'} size="small" /></TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}>{incident.assignedTeam}</TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Stack spacing={0.5}>{getEtaLabel(incident)}<Typography variant="caption" color="text.secondary">{getCountdownText(incident)}</Typography></Stack></TableCell>
-                <TableCell sx={{ color: '#f5f7fa', borderColor: 'rgba(255,255,255,0.08)' }}><Stack direction="row" spacing={1}><Button size="small" variant="outlined" onClick={() => openInvestigate(incident)} disabled={!canInvestigate}>Investigate</Button><Button size="small" variant="outlined" onClick={() => openAssignDialog(incident)} disabled={!canAssign}>Assign</Button></Stack></TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{incident.id}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}><Chip label={incident.severity} color={incident.severity === 'critical' ? 'error' : incident.severity === 'high' ? 'warning' : 'success'} size="small" /></TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{incident.title}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{incident.sourceIp}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}><Chip label={incident.status} color={incident.status === 'Resolved' || incident.status === 'Closed' ? 'success' : incident.status === 'Assigned' ? 'warning' : incident.status === 'Investigation' ? 'info' : 'error'} size="small" /></TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}>{incident.assignedTeam}</TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}><Stack spacing={0.5}>{getEtaLabel(incident)}<Typography variant="caption" color="text.secondary">{getCountdownText(incident)}</Typography></Stack></TableCell>
+                <TableCell sx={{ color: 'text.primary', borderColor: 'divider' }}><Stack direction="row" spacing={1}><Button size="small" variant="outlined" onClick={() => openInvestigate(incident)} disabled={!canInvestigate}>Investigate</Button><Button size="small" variant="outlined" onClick={() => openAssignDialog(incident)} disabled={!canAssign}>Assign</Button></Stack></TableCell>
               </>
             )}
           />
@@ -338,7 +338,7 @@ export default function Incidents() {
                 <Button variant="outlined" sx={{ mt: 1 }} onClick={handleNoteAdd}>Add Note</Button>
                 <Stack spacing={1} sx={{ mt: 1.5 }}>
                   {(selectedIncident.notes ?? []).map((note) => (
-                    <Paper key={note.id} sx={{ p: 1, bgcolor: 'rgba(255,255,255,0.04)' }}>
+                    <Paper key={note.id} sx={{ p: 1, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
                       <Typography variant="body2">{note.text}</Typography>
                       <Typography variant="caption" color="text.secondary">{note.timestamp}</Typography>
                     </Paper>

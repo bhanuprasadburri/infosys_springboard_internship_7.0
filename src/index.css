@@ -1,18 +1,22 @@
 :root {
-  --text: #e8eef8;
-  --text-h: #ffffff;
-  --bg: #090b10;
-  --surface: rgba(15, 23, 42, 0.95);
-  --border: rgba(255,255,255,0.08);
-  --accent: #3f74ff;
-  --accent-strong: #1f6feb;
-  --muted: #9aa4ad;
-  --shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
-  --radius: 20px;
+  --bg: #F8FAFC;
+  --bg-secondary: #F8FAFC;
+  --panel: #FFFFFF;
+  --panel-secondary: #F8FAFC;
+  --border: #E2E8F0;
+  --text: #111827;
+  --text-secondary: #64748B;
+  --accent: #3B82F6;
+  --primary: #2563EB;
+  --success: #16A34A;
+  --warning: #D97706;
+  --danger: #E11D48;
+  --shadow: 0 14px 36px rgba(15, 23, 42, 0.06);
+  --radius: 16px;
 
-  font: 18px/1.6 system-ui, 'Segoe UI', Roboto, sans-serif;
+  font: 16px/1.6 system-ui, 'Segoe UI', Roboto, sans-serif;
   letter-spacing: 0.2px;
-  color-scheme: dark;
+  color-scheme: light;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -32,8 +36,8 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at top, rgba(63, 116, 255, 0.08), transparent 28%),
-    linear-gradient(180deg, #090b10 0%, #05070b 100%);
+  background: radial-gradient(circle at top left, rgba(96, 165, 250, 0.12), transparent 28%), linear-gradient(180deg, var(--bg) 0%, var(--bg-secondary) 100%);
+  transition: background-color 200ms ease, color 200ms ease;
 }
 
 #root {
@@ -49,11 +53,23 @@ textarea {
   font: inherit;
 }
 
+button,
+a,
+input,
+select,
+textarea {
+  transition: transform 200ms ease, box-shadow 200ms ease, background-color 200ms ease, border-color 200ms ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
 h1,
 h2 {
   font-family: 'Segoe UI', Roboto, sans-serif;
   font-weight: 700;
-  color: var(--text-h);
+  color: var(--text);
 }
 
 h1 {
@@ -68,19 +84,4 @@ h2 {
 
 p {
   margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
 }

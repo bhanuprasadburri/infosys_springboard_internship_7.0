@@ -25,17 +25,17 @@ interface AssetHealthPanelProps {
 }
 
 const statusColor = {
-  healthy: '#2e7d32',
-  warning: '#ed6c02',
-  critical: '#d32f2f',
+  healthy: 'success.main',
+  warning: 'warning.main',
+  critical: 'error.main',
 } as const;
 
 export default function AssetHealthPanel({ assets, metrics, cloudResources, summary }: AssetHealthPanelProps) {
   return (
-    <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 4 }}>
+    <Paper elevation={0} sx={{ p: { xs: 2, md: 3 }, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3, boxShadow: '0 10px 24px rgba(15,23,42,0.04)' }}>
       <Stack direction={{ xs: 'column', lg: 'row' }} justifyContent="space-between" alignItems={{ xs: 'flex-start', lg: 'center' }} spacing={2}>
         <Box>
-          <Typography variant="h5" sx={{ color: '#f5f7fa', fontWeight: 700 }}>
+          <Typography variant="h5" sx={{ color: 'text.primary', fontWeight: 700 }}>
             Asset Service - Infrastructure Health
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
@@ -47,14 +47,14 @@ export default function AssetHealthPanel({ assets, metrics, cloudResources, summ
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: 'repeat(2, minmax(0, 1fr))' }, gap: 2, mt: 1 }}>
         <Box>
-          <Paper elevation={0} sx={{ p: 2.2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
-            <Typography variant="subtitle1" sx={{ color: '#f5f7fa', mb: 1.5 }}>
+          <Paper elevation={0} sx={{ p: 2.2, bgcolor: 'background.secondary', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+            <Typography variant="subtitle1" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 600 }}>
               Server Breakdown
             </Typography>
             <Stack spacing={1.1}>
               <Box display="flex" justifyContent="space-between">
                 <Typography color="text.secondary">Total</Typography>
-                <Typography sx={{ color: '#f5f7fa', fontWeight: 600 }}>{summary.serversTotal}</Typography>
+                <Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{summary.serversTotal}</Typography>
               </Box>
               <Box display="flex" justifyContent="space-between">
                 <Typography color="text.secondary">Healthy</Typography>
@@ -73,26 +73,26 @@ export default function AssetHealthPanel({ assets, metrics, cloudResources, summ
         </Box>
 
         <Box>
-          <Paper elevation={0} sx={{ p: 2.2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
-            <Typography variant="subtitle1" sx={{ color: '#f5f7fa', mb: 1.5 }}>
+          <Paper elevation={0} sx={{ p: 2.2, bgcolor: 'background.secondary', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+            <Typography variant="subtitle1" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 600 }}>
               Cloud Breakdown
             </Typography>
             <Stack spacing={1.1}>
               <Box display="flex" justifyContent="space-between">
                 <Typography color="text.secondary">AWS</Typography>
-                <Typography sx={{ color: '#f5f7fa', fontWeight: 600 }}>{summary.awsCount}</Typography>
+                <Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{summary.awsCount}</Typography>
               </Box>
               <Box display="flex" justifyContent="space-between">
                 <Typography color="text.secondary">Azure</Typography>
-                <Typography sx={{ color: '#f5f7fa', fontWeight: 600 }}>{summary.azureCount}</Typography>
+                <Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{summary.azureCount}</Typography>
               </Box>
               <Box display="flex" justifyContent="space-between">
                 <Typography color="text.secondary">K8s Clusters</Typography>
-                <Typography sx={{ color: '#f5f7fa', fontWeight: 600 }}>{summary.kubernetesClusters}</Typography>
+                <Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{summary.kubernetesClusters}</Typography>
               </Box>
               <Box display="flex" justifyContent="space-between">
                 <Typography color="text.secondary">Pods</Typography>
-                <Typography sx={{ color: '#f5f7fa', fontWeight: 600 }}>{summary.kubernetesPods}</Typography>
+                <Typography sx={{ color: 'text.primary', fontWeight: 600 }}>{summary.kubernetesPods}</Typography>
               </Box>
             </Stack>
           </Paper>
@@ -101,15 +101,15 @@ export default function AssetHealthPanel({ assets, metrics, cloudResources, summ
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', lg: 'repeat(2, minmax(0, 1fr))' }, gap: 2, mt: 0.5 }}>
         <Box>
-          <Paper elevation={0} sx={{ p: 2.2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
-            <Typography variant="subtitle1" sx={{ color: '#f5f7fa', mb: 1.5 }}>
+          <Paper elevation={0} sx={{ p: 2.2, bgcolor: 'background.secondary', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+            <Typography variant="subtitle1" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 600 }}>
               Resource Averages
             </Typography>
             <Stack spacing={1.6}>
               {metrics.map((metric) => (
                 <Box key={metric.label}>
                   <Box display="flex" justifyContent="space-between" sx={{ mb: 0.5 }}>
-                    <Typography variant="body2" sx={{ color: '#f5f7fa' }}>{metric.label}</Typography>
+                    <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 500 }}>{metric.label}</Typography>
                     <Typography variant="body2" color="text.secondary">{metric.value}{metric.unit}</Typography>
                   </Box>
                   <LinearProgress variant="determinate" value={metric.value} color={metric.status === 'critical' ? 'error' : metric.status === 'warning' ? 'warning' : 'success'} sx={{ height: 8, borderRadius: 999 }} />
@@ -120,18 +120,18 @@ export default function AssetHealthPanel({ assets, metrics, cloudResources, summ
         </Box>
 
         <Box>
-          <Paper elevation={0} sx={{ p: 2.2, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 3 }}>
-            <Typography variant="subtitle1" sx={{ color: '#f5f7fa', mb: 1.5 }}>
+          <Paper elevation={0} sx={{ p: 2.2, bgcolor: 'background.secondary', border: '1px solid', borderColor: 'divider', borderRadius: 2 }}>
+            <Typography variant="subtitle1" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 600 }}>
               Health Summary
             </Typography>
-            <Typography variant="body1" sx={{ color: '#f5f7fa', mb: 1 }}>
+            <Typography variant="body1" sx={{ color: 'text.primary', mb: 1, fontWeight: 500 }}>
               Uptime: {summary.cpuAverage}% • Outages: {summary.outages} • Status: {summary.slaStatus}
             </Typography>
-            <Divider sx={{ my: 1.5, borderColor: 'rgba(255,255,255,0.08)' }} />
+            <Divider sx={{ my: 1.5, borderColor: 'divider' }} />
             <Stack spacing={1.2}>
               {assets.slice(0, 4).map((asset) => (
                 <Box key={asset.id} display="flex" justifyContent="space-between" alignItems="center">
-                  <Typography variant="body2" sx={{ color: '#f5f7fa' }}>{asset.name}</Typography>
+                  <Typography variant="body2" sx={{ color: 'text.primary' }}>{asset.name}</Typography>
                   <Chip label={asset.status} color={asset.status === 'critical' ? 'error' : asset.status === 'warning' ? 'warning' : 'success'} size="small" />
                 </Box>
               ))}
@@ -141,16 +141,16 @@ export default function AssetHealthPanel({ assets, metrics, cloudResources, summ
       </Box>
 
       <Box sx={{ mt: 2.5 }}>
-        <Typography variant="subtitle1" sx={{ color: '#f5f7fa', mb: 1.5 }}>
+        <Typography variant="subtitle1" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 600 }}>
           Cloud Resources
         </Typography>
         <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(4, minmax(0, 1fr))' }, gap: 1.5 }}>
           {cloudResources.map((resource) => (
             <Box key={resource.name}>
-              <Paper elevation={0} sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.03)', borderRadius: 2 }}>
-                <Typography variant="body2" sx={{ color: '#f5f7fa' }}>{resource.name}</Typography>
+              <Paper elevation={0} sx={{ p: 1.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 10 }}>
+                <Typography variant="body2" sx={{ color: 'text.primary' }}>{resource.name}</Typography>
                 <Typography variant="caption" color="text.secondary">{resource.provider} • {resource.type}</Typography>
-                <Typography variant="h6" sx={{ color: '#f5f7fa', mt: 0.75 }}>{resource.count}</Typography>
+                <Typography variant="h6" sx={{ color: 'text.primary', mt: 0.75 }}>{resource.count}</Typography>
               </Paper>
             </Box>
           ))}

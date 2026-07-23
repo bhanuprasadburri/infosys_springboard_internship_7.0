@@ -1,12 +1,20 @@
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { readSession } from '../utils/authUtils';
 
-export default function ProtectedRoute() {
+interface ProtectedRouteProps {
+  adminOnly?: boolean;
+}
+
+export default function ProtectedRoute({ adminOnly = false }: ProtectedRouteProps) {
   const location = useLocation();
   const session = readSession();
 
-  if (!session) {
-    return <Navigate to="/login" replace state={{ from: location }} />;
+  if (!session?.user) {
+    return <Navigate to="/" replace state={{ from: location }} />;
+  }
+
+  if (adminOnly && session.mode !== 'admin') {
+    return <Navigate to="/dashboard" replace state={{ from: location }} />;
   }
 
   return <Outlet />;

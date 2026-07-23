@@ -10,7 +10,14 @@ const handleResponse = async (response: Response) => {
   return response.json();
 };
 
+const makeHeaders = () => ({
+  'Content-Type': 'application/json',
+});
+
 export const apiClient = {
+  get: (path: string) => fetch(`${API_BASE}${path}`).then(handleResponse),
+  post: (path: string, data: any) => fetch(`${API_BASE}${path}`, { method: 'POST', headers: makeHeaders(), body: JSON.stringify(data) }).then(handleResponse),
+
   // ===== Assets =====
   getAssets: () =>
     fetch(`${API_BASE}/assets`).then(handleResponse),

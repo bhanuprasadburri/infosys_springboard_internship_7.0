@@ -11,8 +11,8 @@ interface DataTableProps<T> {
 
 export default function DataTable<T>({ title, columns, rows, renderRow, emptyText = 'No records found', footer }: DataTableProps<T>) {
   return (
-    <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
-      <Typography variant="h6" sx={{ color: '#f5f7fa', mb: 1.5 }}>
+    <Paper elevation={0} sx={{ p: { xs: 2, md: 2.5 }, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3, boxShadow: '0 10px 24px rgba(15,23,42,0.04)' }}>
+      <Typography variant="h6" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 700 }}>
         {title}
       </Typography>
       <TableContainer>
@@ -20,20 +20,20 @@ export default function DataTable<T>({ title, columns, rows, renderRow, emptyTex
           <TableHead>
             <TableRow>
               {columns.map((column) => (
-                <TableCell key={column} sx={{ color: '#98a7b7', borderColor: 'rgba(255,255,255,0.08)' }}>{column}</TableCell>
+                <TableCell key={column}>{column}</TableCell>
               ))}
             </TableRow>
           </TableHead>
           <TableBody>
             {rows.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={columns.length} sx={{ color: '#98a7b7', borderColor: 'rgba(255,255,255,0.08)', py: 4, textAlign: 'center' }}>
+                <TableCell colSpan={columns.length} sx={{ color: 'text.secondary', py: 4, textAlign: 'center' }}>
                   {emptyText}
                 </TableCell>
               </TableRow>
             ) : (
               rows.map((row, index) => (
-                <TableRow key={index}>{renderRow(row)}</TableRow>
+                <TableRow key={index} sx={{ '&:hover': { bgcolor: 'background.secondary' } }}>{renderRow(row)}</TableRow>
               ))
             )}
           </TableBody>

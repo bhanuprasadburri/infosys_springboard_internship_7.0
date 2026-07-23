@@ -58,7 +58,7 @@ export default function DevSecOps() {
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', bgcolor: '#050b13', color: '#f5f7fa' }}>
+    <Box sx={{ minHeight: '100vh', bgcolor: 'background.secondary', color: 'text.primary' }}>
       <TopBar />
       <Box sx={{ display: 'flex', flexDirection: { xs: 'column', md: 'row' } }}>
         <Sidebar />
@@ -69,8 +69,8 @@ export default function DevSecOps() {
             <StatCard title="OWASP Scan" value={summary.criticalCves > 0 ? '❌ Failed' : '✅ Passed'} subtitle="Status" />
             <StatCard title="Risk Score" value={summary.avgRisk.toString()} subtitle="Average" />
           </Box>
-          <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3, mb: 2 }}>
-            <Typography variant="h6" sx={{ mb: 1.5 }}>Security Review Status</Typography>
+          <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3, mb: 2 }}>
+            <Typography variant="h6" sx={{ mb: 1.5, color: 'text.primary', fontWeight: 700 }}>Security Review Status</Typography>
             <Stack spacing={1}>
               <Typography variant="body2" color="text.secondary">Last review: {latestReview?.timestamp ?? 'Pending'}</Typography>
               <Typography variant="body2" color="text.secondary">Status: {latestReview?.approved ? '✅ Approved' : '⏳ Pending review'}</Typography>
@@ -78,7 +78,7 @@ export default function DevSecOps() {
               <Typography variant="body2" color="text.secondary">Total reviews: {reviewHistory.length}</Typography>
             </Stack>
           </Paper>
-          <Button variant="contained" sx={{ bgcolor: '#c62828', '&:hover': { bgcolor: '#8b1e1e' } }} onClick={runCheck} disabled={runningCheck || !canReview}>
+          <Button variant="contained" color="error" onClick={runCheck} disabled={runningCheck || !canReview}>
             {runningCheck ? <CircularProgress size={16} sx={{ mr: 1 }} /> : null}
             {runningCheck ? 'Running compliance check...' : 'Compliance Check'}
           </Button>
@@ -97,14 +97,14 @@ export default function DevSecOps() {
               <Button variant="outlined" size="small" onClick={runCheck} disabled={runningCheck} sx={{ mt: 2 }}>Re-run Check</Button>
             </Paper>
           )}
-          <Paper elevation={0} sx={{ p: 2, mt: 2, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
+          <Paper elevation={0} sx={{ p: 2, mt: 2, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3 }}>
             <Typography variant="subtitle2" sx={{ mb: 1.5 }}>Security Reviews History</Typography>
             {reviewHistory.length === 0 ? (
               <Typography variant="body2" color="text.secondary">No DevSecOps reviews have been recorded yet.</Typography>
             ) : (
               <Stack spacing={1}>
                 {reviewHistory.map((entry) => (
-                  <Box key={entry.id} sx={{ p: 1.5, bgcolor: 'rgba(255,255,255,0.02)', borderRadius: 2, borderLeft: `3px solid ${entry.approved ? '#2e7d32' : '#ed6c02'}` }}>
+                  <Box key={entry.id} sx={{ p: 1.5, bgcolor: 'grey.50', borderRadius: 2, borderLeft: `3px solid ${entry.approved ? '#2e7d32' : '#ed6c02'}` }}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 0.5 }}>
                       <Typography variant="body2" sx={{ fontWeight: 500 }}>{entry.timestamp}</Typography>
                       <Chip label={entry.approved ? '✅ Passed' : '⚠️ Issues'} size="small" color={entry.approved ? 'success' : 'warning'} />

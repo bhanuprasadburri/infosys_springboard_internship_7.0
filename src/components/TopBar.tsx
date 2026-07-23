@@ -1,11 +1,12 @@
-import { AppBar, Badge, Box, Button, ListItemText, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
+import { DarkModeRounded, LightModeRounded } from '@mui/icons-material';
+import { AppBar, Badge, Box, Button, IconButton, ListItemText, Menu, MenuItem, Toolbar, Typography } from '@mui/material';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
 import { useAppState } from '../context/AppStateContext';
 
 export default function TopBar() {
-  const { user, logout } = useAuth();
+  const { user, logout, toggleTheme, themeMode } = useAuth();
   const { auditLogs } = useAppState();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
@@ -14,25 +15,37 @@ export default function TopBar() {
 
   const handleLogout = () => {
     logout();
-    const session = localStorage.getItem('sentinelcore-auth-mode');
-    navigate(session === 'admin' ? '/admin/login' : '/user/login');
+    navigate('/');
   };
 
   return (
-    <AppBar position="static" elevation={0} sx={{ bgcolor: '#8b1e1e', borderBottom: '1px solid rgba(255,255,255,0.12)' }}>
-      <Toolbar sx={{ justifyContent: 'space-between', flexWrap: 'wrap', gap: 2 }}>
-        <Typography variant="h6" sx={{ fontWeight: 700 }}>
-          SentinelCore SecureOps
-        </Typography>
+    <AppBar position="static" elevation={0} sx={{ bgcolor: 'background.paper', borderBottom: '1px solid', borderColor: 'divider', boxShadow: '0 10px 30px rgba(15,23,42,0.05)' }}>
+      <Toolbar sx={{ minHeight: { xs: 74, md: 84 }, px: { xs: 2, md: 3 }, justifyContent: 'space-between', flexWrap: 'wrap', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.25 }}>
+          <Box sx={{ width: 40, height: 40, borderRadius: '50%', bgcolor: 'primary.main', color: 'common.white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 700, fontSize: '0.95rem' }}>
+            SC
+          </Box>
+          <Box>
+            <Typography variant="h6" sx={{ fontWeight: 700, color: 'text.primary', lineHeight: 1.1 }}>
+              SentinelCore SecureOps
+            </Typography>
+            <Typography variant="caption" sx={{ display: { xs: 'none', sm: 'block' } }}>
+              Security operations command center
+            </Typography>
+          </Box>
+        </Box>
         {user ? (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Button color="inherit" onClick={(event) => setAnchorEl(event.currentTarget)} sx={{ minWidth: 0, p: 0 }}>
-              <Badge badgeContent={recentNotifications.length} color="secondary">
-                <Typography variant="body2">Alerts</Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
+            <Button color="inherit" onClick={(event) => setAnchorEl(event.currentTarget)} sx={{ minWidth: 0, px: 1.25, py: 0.75, color: 'text.primary', borderRadius: 999, border: '1px solid', borderColor: 'divider', bgcolor: 'background.secondary' }}>
+              <Badge badgeContent={recentNotifications.length} color="error">
+                <Typography variant="body2" sx={{ fontWeight: 600 }}>Alerts</Typography>
               </Badge>
             </Button>
-            <Typography variant="body2">{user.role} • {user.fullName}</Typography>
-            <Typography variant="body2" sx={{ cursor: 'pointer', color: '#fdd0d0' }} onClick={handleLogout}>
+            <Typography variant="body2" sx={{ color: 'text.secondary', display: { xs: 'none', sm: 'block' } }}>{user.role} • {user.fullName}</Typography>
+            <IconButton onClick={toggleTheme} color="primary" size="small" sx={{ border: '1px solid', borderColor: 'divider', bgcolor: 'background.secondary' }}>
+              {themeMode === 'dark' ? <LightModeRounded /> : <DarkModeRounded />}
+            </IconButton>
+            <Typography variant="body2" sx={{ cursor: 'pointer', color: 'primary.main', fontWeight: 600, '&:hover': { color: 'primary.dark' } }} onClick={handleLogout}>
               Logout
             </Typography>
           </Box>

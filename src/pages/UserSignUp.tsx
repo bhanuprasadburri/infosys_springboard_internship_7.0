@@ -1,8 +1,9 @@
 import { Visibility, VisibilityOff } from '@mui/icons-material';
-import { Alert, Box, Button, CircularProgress, IconButton, InputAdornment, Link, Paper, Stack, TextField, Typography } from '@mui/material';
+import { Alert, Box, Button, CircularProgress, IconButton, InputAdornment, Link, Paper, Snackbar, Stack, TextField, Typography } from '@mui/material';
 import { useMemo, useState } from 'react';
 import { Link as RouterLink, useNavigate } from 'react-router-dom';
-import { createSession, isStrongPassword, isValidEmail, sanitizeInput } from '../utils/authUtils';
+import { useAuth } from '../auth/AuthContext';
+import { isStrongPassword, isValidEmail, sanitizeInput } from '../utils/authUtils';
 
 export default function UserSignUp() {
   const [fullName, setFullName] = useState('');
@@ -14,7 +15,9 @@ export default function UserSignUp() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState({ open: false, message: '' });
   const navigate = useNavigate();
+  const { signup } = useAuth();
 
   const canSubmit = useMemo(() => fullName.trim().length > 0 && email.trim().length > 0 && password.length > 0 && confirmPassword.length > 0, [confirmPassword.length, email, fullName, password]);
 
@@ -48,31 +51,27 @@ export default function UserSignUp() {
       return;
     }
 
-    const storedUsers = localStorage.getItem('sentinelcore-users');
-    const users = storedUsers ? JSON.parse(storedUsers) : [];
-    if (users.some((entry: { email: string }) => entry.email === cleanEmail)) {
-      setError('An account with that email already exists.');
+    setLoading(true);
+    const success = await signup(cleanFullName, cleanEmail, cleanPassword);
+    setLoading(false);
+
+    if (!success) {
+      setError('Unable to create account.');
+      setToast({ open: true, message: 'Unable to create account.' });
       return;
     }
 
-    setLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    setLoading(false);
-
-    const newUser = { id: crypto.randomUUID(), fullName: cleanFullName, email: cleanEmail, password: cleanPassword };
-    users.push(newUser);
-    localStorage.setItem('sentinelcore-users', JSON.stringify(users));
-    createSession({ id: newUser.id, fullName: cleanFullName, email: cleanEmail, role: 'Viewer' }, 'user-token', 'user');
     setSuccess('Account created successfully.');
+    setToast({ open: true, message: 'Account created successfully.' });
     navigate('/dashboard', { replace: true });
   };
 
   return (
-    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'radial-gradient(circle at top, #1e3a8a 0%, #050b13 60%)', p: { xs: 2, md: 4 } }}>
-      <Paper elevation={0} sx={{ width: '100%', maxWidth: 520, p: { xs: 3, md: 4 }, borderRadius: 4, bgcolor: 'rgba(15, 23, 34, 0.86)', border: '1px solid rgba(255,255,255,0.12)', backdropFilter: 'blur(16px)', boxShadow: '0 20px 45px rgba(0,0,0,0.3)' }}>
+    <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', bgcolor: 'background.secondary', p: { xs: 2, md: 4 } }}>
+      <Paper elevation={0} sx={{ width: '100%', maxWidth: 520, p: { xs: 3, md: 4 }, borderRadius: 4, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', boxShadow: '0 16px 40px rgba(15,23,42,0.08)' }}>
         <Stack spacing={2.5}>
           <Box>
-            <Typography variant="h5" sx={{ fontWeight: 700, color: '#f5f7fa' }}>Create User Account</Typography>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: 'text.primary' }}>Create User Account</Typography>
             <Typography variant="body2" color="text.secondary">Register to access the user workspace.</Typography>
           </Box>
 
@@ -84,7 +83,7 @@ export default function UserSignUp() {
               <TextField label="Confirm Password" type={showConfirmPassword ? 'text' : 'password'} value={confirmPassword} onChange={(event) => setConfirmPassword(event.target.value)} placeholder="••••••••" fullWidth required InputProps={{ endAdornment: <InputAdornment position="end"><IconButton onClick={() => setShowConfirmPassword((value) => !value)} edge="end">{showConfirmPassword ? <VisibilityOff /> : <Visibility />}</IconButton></InputAdornment> }} />
               {error ? <Alert severity="error" sx={{ borderRadius: 2 }}>{error}</Alert> : null}
               {success ? <Alert severity="success" sx={{ borderRadius: 2 }}>{success}</Alert> : null}
-              <Button type="submit" variant="contained" disabled={!canSubmit || loading} sx={{ py: 1.2, fontWeight: 700, bgcolor: '#2563eb', '&:hover': { bgcolor: '#1d4ed8' } }}>
+              <Button type="submit" variant="contained" disabled={!canSubmit || loading} sx={{ py: 1.2, fontWeight: 700 }}>
                 {loading ? <CircularProgress size={22} color="inherit" /> : 'Create Account'}
               </Button>
             </Stack>
@@ -95,6 +94,7 @@ export default function UserSignUp() {
           </Typography>
         </Stack>
       </Paper>
+      <Snackbar open={toast.open} autoHideDuration={2500} onClose={() => setToast({ open: false, message: '' })} message={toast.message} />
     </Box>
   );
 }

@@ -7,18 +7,18 @@ interface AlertsFeedProps {
 
 export default function AlertsFeed({ alerts }: AlertsFeedProps) {
   return (
-    <Paper elevation={0} sx={{ p: 2.5, bgcolor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 3 }}>
-      <Typography variant="h6" sx={{ color: '#f5f7fa', mb: 1.5 }}>
+    <Paper elevation={0} sx={{ p: { xs: 2.25, md: 2.75 }, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider', borderRadius: 3, boxShadow: '0 10px 24px rgba(15,23,42,0.04)' }}>
+      <Typography variant="h6" sx={{ color: 'text.primary', mb: 1.5, fontWeight: 700 }}>
         Recent Alerts
       </Typography>
       <Stack spacing={1.2}>
         {alerts.map((alert) => (
-          <Box key={alert.id} sx={{ p: 1.3, borderRadius: 2, bgcolor: 'rgba(255,255,255,0.03)' }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 1 }}>
-              <Typography variant="body2" sx={{ color: '#f5f7fa' }}>{alert.message}</Typography>
+          <Box key={alert.id} sx={{ p: 1.4, borderRadius: 2, bgcolor: 'background.secondary', border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 1 }}>
+              <Typography variant="body2" sx={{ color: 'text.primary', fontWeight: 500, flex: 1 }}>{alert.message}</Typography>
               <Chip label={alert.severity} color={alert.severity === 'critical' || alert.severity === 'high' ? 'error' : alert.severity === 'medium' ? 'warning' : 'success'} size="small" />
             </Box>
-            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.6 }}>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 0.75 }}>
               {alert.source} • {alert.status} • {alert.timestamp}
             </Typography>
           </Box>
